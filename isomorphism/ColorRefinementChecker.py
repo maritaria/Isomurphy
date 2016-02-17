@@ -51,6 +51,7 @@ def getVerticesByDegree(graph : Graph) -> dict:
     for vertex in graph.V():
         verticesForDegree = verticesDictionary.get(vertex.deg(), [])
         verticesForDegree.append(vertex)
+        verticesDictionary[vertex.deg()] = verticesForDegree
     return verticesDictionary
 
 def equalNeighborhood(vertex1 : Vertex, vertex2 : Vertex) -> bool:
