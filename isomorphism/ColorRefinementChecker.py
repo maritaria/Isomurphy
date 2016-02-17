@@ -10,20 +10,36 @@ class ColorRefinementChecker(IsomorphismChecker):
         #TODO
         return False
 
-def makeColors(graph : Graph) -> Graph:
+def makeColors(graph : Graph):
 
-    #Initialization. put 'colors' on each vertex from their degrees, starting from 1.
+    #Initialization. put 'colors' on each vertex from their degrees, starting from 0.
     verticesDictionary = getVerticesByDegree(graph)
     currentColor = 0
     for degree, vertices in verticesDictionary.items():
-        currentColor += 1
         for vertex in vertices:
             vertex.color = currentColor
+        currentColor += 1
 
-    #TODO iterative step keep refining
+    #iterative step keep refining
 
+    changed = True
+    while changed:
+        checkColor = 0;
+        changed = False
+        while checkColor < currentColor:
+            allSameColor = getVerticesByColor(graph, checkColor)
+            first = allSameColor.pop(0)
+            changedColor = False
+            while len(allSameColor) > 0:
+                second = allSameColor.pop(0)
+                if not (equalNeighborhood(first, second)):
+                    second.color = currentColor
+                    changed = True
+                    changedColor = True
+            if changedColor:
+                currentColor += 1
 
-    pass
+            checkColor += 1
 
 def getVerticesByDegree(graph : Graph) -> dict:
 
@@ -33,7 +49,7 @@ def getVerticesByDegree(graph : Graph) -> dict:
         verticesForDegree.append(vertex)
     return verticesDictionary
 
-def equalNeighbours(vertex1 : Vertex, vertex2 : Vertex) -> bool:
+def equalNeighborhood(vertex1 : Vertex, vertex2 : Vertex) -> bool:
     return [v.color for v in quickSortByColor(vertex1.nbs())] == [v.color for v in quickSortByColor(vertex2.nbs())]
 
 def quickSortByColor(items : list) -> list:
@@ -52,3 +68,6 @@ def partition(items : list, discriminator : int) -> (list, list):
         else:
             right.append(item)
     return left, right
+
+def getVerticesByColor(graph : Graph, color : int):
+    return [v for v in graph.V() if v.color = color]
