@@ -3,12 +3,12 @@ from isomorphism.IsomorphismChecker import IsomorphismChecker
 
 class ColorRefinementChecker(IsomorphismChecker):
 
-    def isIsomorphic(self, graph1 : Graph, graph2 : Graph) -> bool:
+    def isIsomorphic(self, graph1: Graph, graph2: Graph) -> bool:
         graph1Colors = makeColors(graph1)
         graph2Colors = makeColors(graph2)
         return graph1Colors == graph2Colors
 
-def makeColors(graph : Graph):
+def makeColors(graph: Graph):
 
     #Initialization. put 'colors' on each vertex from their degrees, starting from 0.
     verticesDictionary = getVerticesByDegree(graph)
