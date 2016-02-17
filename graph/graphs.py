@@ -46,7 +46,7 @@ class Vertex:
 	def __repr__(self):
 		return str(self._label)
 
-	def adj(self, other: Vertex) -> bool:
+	def adj(self, other: "Vertex") -> bool:
 		"""
 		Returns True iff Vertex <self> is adjacent to <other> Vertex.
 		"""
@@ -86,6 +86,8 @@ class Vertex:
 		if (self._nbs[other] == 0):
 			self._nbs.pop(other, None)
 
+	def label(self):
+		return self._label
 
 class Edge:
 	"""
