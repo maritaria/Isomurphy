@@ -67,11 +67,11 @@ def partition(items : list, discriminator : int) -> (list, list):
     left = []
     right = []
     for item in items:
-        if (item.color < discriminator):
+        if item.color < discriminator:
             left.append(item)
         else:
             right.append(item)
     return left, right
 
-def getVerticesByColor(graph : Graph, color : int):
+def getVerticesByColor(graph: Graph, color: int):
     return [v for v in graph.V() if v.color == color]
