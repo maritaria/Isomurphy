@@ -83,7 +83,7 @@ def readgraphlist(readline):
 	return L, options
 
 
-def loadgraph(filename: str) -> Graph:
+def loadgraph(filename: str, loadList: bool = False) -> Graph:
 	"""
 	Reads the file <filename>, and returns the corresponding Graph object.
 	In that case, the output is a 2-tuple, where the first item is a list of graphs,
@@ -97,9 +97,14 @@ def loadgraph(filename: str) -> Graph:
 			S = readfile.readline()
 		return S
 
-	G, options, tmp = readgraph(readln)
-	readfile.close()
-	return G  # ,options
+	if loadList:
+		GL, options = readgraphlist(readln)
+		readfile.close()
+		return GL, options
+	else:
+		G, options, tmp = readgraph(readln)
+		readfile.close()
+		return G  # ,options
 
 
 def loadgraphs(filename: str) -> list:
