@@ -12,7 +12,7 @@ class ColorRefinementChecker(IsomorphismChecker):
 
 def makeColors(graph : Graph) -> Graph:
 
-    #Initialization. put 'colors' on each vertex equal to their degrees, starting from 1.
+    #Initialization. put 'colors' on each vertex from their degrees, starting from 1.
     verticesDictionary = getVerticesByDegree(graph)
     currentColor = 0
     for (degree, vertices) in verticesDictionary.items():
