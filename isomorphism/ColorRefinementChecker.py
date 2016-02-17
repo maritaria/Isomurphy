@@ -27,18 +27,19 @@ def makeColors(graph: Graph):
         changed = False
         while checkColor < currentColor:
             allSameColor = getVerticesByColor(graph, checkColor)
-            first = allSameColor.pop(0)
-            changedColor = False
-            while len(allSameColor) > 0:
-                second = allSameColor.pop(0)
-                if not (equalNeighborhood(first, second)):
-                    second.color = currentColor
-                    changed = True
-                    changedColor = True
-            if changedColor:
-                currentColor += 1
+            if len(allSameColor) > 0:
+                first = allSameColor.pop(0)
+                changedColor = False
+                while len(allSameColor) > 0:
+                    second = allSameColor.pop(0)
+                    if not (equalNeighborhood(first, second)):
+                        second.color = currentColor
+                        changed = True
+                        changedColor = True
+                if changedColor:
+                    currentColor += 1
 
-            checkColor += 1
+                checkColor += 1
     colors = [0] * currentColor - 1
     for vertex in graph.V():
         colors[vertex.color] += 1
