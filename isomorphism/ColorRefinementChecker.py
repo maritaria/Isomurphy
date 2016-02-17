@@ -19,10 +19,9 @@ def makeColors(graph : Graph):
         currentColor += 1
 
     #iterative step keep refining
-
     changed = True
     while changed:
-        checkColor = 0;
+        checkColor = 0
         changed = False
         while checkColor < currentColor:
             allSameColor = getVerticesByColor(graph, checkColor)
@@ -58,7 +57,7 @@ def quickSortByColor(items : list) -> list:
     if (len(items) == 0 or len(items) == 1):
         return items
     pivot = items.pop(0)
-    small, big = partition(items, pivot.color);
+    small, big = partition(items, pivot.color)
     return quickSortByColor(small) + [pivot] + quickSortByColor(big)
 
 def partition(items : list, discriminator : int) -> (list, list):
@@ -72,4 +71,4 @@ def partition(items : list, discriminator : int) -> (list, list):
     return left, right
 
 def getVerticesByColor(graph : Graph, color : int):
-    return [v for v in graph.V() if v.color = color]
+    return [v for v in graph.V() if v.color == color]
