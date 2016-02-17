@@ -40,7 +40,7 @@ def quickSortByColor(items : list) -> list:
     if (len(items) == 0 or len(items) == 1):
         return items
     pivot = items.pop(0)
-    small, big = partition(items);
+    small, big = partition(items, pivot.color);
     return quickSortByColor(small) + [pivot] + quickSortByColor(big)
 
 def partition(items : list, discriminator : int) -> (list, list):
