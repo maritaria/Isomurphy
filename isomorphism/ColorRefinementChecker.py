@@ -15,8 +15,10 @@ def makeColors(graph: Graph):
     currentColor = 0
     for degree, vertices in verticesDictionary.items():
         for vertex in vertices:
-            vertex.color = currentColor
-        currentColor += 1
+            vertex.color = degree
+        currentColor = max(degree, currentColor)
+        
+    currentColor += 1
 
     #iterative step keep refining
     changed = True
