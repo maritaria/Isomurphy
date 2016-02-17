@@ -83,7 +83,7 @@ def readgraphlist(graphclass, readline):
     return L, options
 
 
-def loadgraph(filename, graphclass=basicgraphs.Graph, readlist=False):
+def loadgraph(filename : str, graphclass=basicgraphs.Graph, readlist=False):
     """
 	Reads the file <filename>, and returns the corresponding Graph object.
 	Optional second argument: you may use your own <Graph> class, instead of
@@ -136,7 +136,7 @@ def inputgraph(graphclass=basicgraphs.Graph, readlist=False):
         return G  # ,options
 
 
-def writegraphlist(GL, writeline, options=[]):
+def writegraphlist(GL : list, writeline, options=[]):
     """
 	For internal use.
 	"""
@@ -165,7 +165,7 @@ def writegraphlist(GL, writeline, options=[]):
             writeline('--- Next Graph:')
 
 
-def savegraph(GL, filename, options=[]):
+def savegraph(GL, filename : str, options=[]):
     """
 	Saves the given Graph <GL> in the given <filename>.
 	Optional last argument: a list of options that will be included in the 
@@ -202,7 +202,7 @@ def printgraph(GL, options=[]):
         writegraphlist([GL], writeln, options)
 
 
-def writeDOT(G, filename, directed=False):
+def writeDOT(G, filename : str, directed:bool=False):
     """
 	Writes the given Graph <G> in .dot format to <filename>.
 	If vertices contain attributes <label>, <colortext> or <colornum>, these are also
