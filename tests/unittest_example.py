@@ -23,7 +23,3 @@ class TestStringMethods(unittest.TestCase):
 		# check that s.split fails when the separator is not a string
 		with self.assertRaises(TypeError):
 			s.split(2)
-
-#This code must be on the bottom of the testcase in order for it to run
-if __name__ == '__main__':
-	unittest.main()
