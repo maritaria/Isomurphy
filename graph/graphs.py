@@ -290,8 +290,11 @@ class Graph():
 		newVerts = {}
 		for v in self.V():
 			newVerts[v] = c.addvertex(v.label())
+		linkedVerts = []
 		for v, newV in newVerts.items():
 			for w, newW in newVerts.items():
 				if (v != w) and w.adj(v):
-					c.addedge(newV, newW)
+					if c.isdirected() or (newW not in linkedVerts):
+						c.addedge(newV, newW)
+						linkedVerts.append(newV)
 		return c
