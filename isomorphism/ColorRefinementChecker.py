@@ -39,8 +39,8 @@ def makeColors(graph: Graph):
                 if changedColor:
                     currentColor += 1
 
-                checkColor += 1
-    colors = [0] * currentColor - 1
+            checkColor += 1
+    colors = [0] * currentColor
     for vertex in graph.V():
         colors[vertex.color] += 1
     return colors
