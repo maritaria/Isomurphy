@@ -4,11 +4,9 @@ from isomorphism.IsomorphismChecker import IsomorphismChecker
 class ColorRefinementChecker(IsomorphismChecker):
 
     def isIsomorphic(self, graph1 : Graph, graph2 : Graph) -> bool:
-
-
-
-        #TODO
-        return False
+        graph1Colors = makeColors(graph1)
+        graph2Colors = makeColors(graph2)
+        return graph1Colors == graph2Colors
 
 def makeColors(graph : Graph):
 
@@ -40,6 +38,10 @@ def makeColors(graph : Graph):
                 currentColor += 1
 
             checkColor += 1
+    colors = [0] * currentColor - 1
+    for vertex in graph.V():
+        colors[vertex.color] += 1
+    return colors
 
 def getVerticesByDegree(graph : Graph) -> dict:
 
