@@ -232,6 +232,11 @@ class Graph():
 		self._E.append(e)
 		return e
 
+	def findvertex(self, label : int) -> "Vertex":
+		for v in self.V():
+			if v.label() == label:
+				return v
+
 	def findedge(self, u: "Vertex", v: "Vertex") -> "Edge":
 		"""
 		If <u> and <v> are adjacent, this returns an Edge between them.
