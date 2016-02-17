@@ -10,7 +10,6 @@ The interface of these classes is extensive and allows programming all kinds of 
 However, the data structure used is quite basic and inefficient: a Graph object stores only a Vertex list and an Edge list, and methods such as adjacency testing / finding neighbors of a Vertex require going through the entire Edge list!
 """
 # version: 29-01-2015, Paul Bonsma
-from graph.graphIO import loadgraph, savegraph
 
 unsafe = False
 
@@ -31,7 +30,7 @@ class Vertex:
 	except for __repr__.
 	"""
 
-	def __init__(self, graph: Graph, label: int = 0):
+	def __init__(self, graph: "Graph", label: int = 0):
 		"""
 		Creates a Vertex, part of <Graph>, with optional label <label>.
 		(Labels of different vertices may be chosen the same; this does
@@ -74,12 +73,12 @@ class Vertex:
 		"""
 		return len(self.inclist())
 
-	def internalAddEdge(self, edge: Edge):
+	def internalAddEdge(self, edge: "Edge"):
 		self._links.append(edge)
 		other = edge.otherend(self)
 		self._nbs[other] = self._nbs.get(other, 0) + 1
 
-	def internalDelEdge(self, edge: Edge):
+	def internalDelEdge(self, edge: "Edge"):
 		self._links.remove(edge)
 		other = edge.otherend(self)
 		self._nbs[other] = self._nbs[other]
@@ -95,7 +94,7 @@ class Edge:
 	(Vertex objects). The order of these is arbitrary (undirected edges).
 	"""
 
-	def __init__(self, tail : Vertex, head : Vertex):
+	def __init__(self, tail : "Vertex", head : "Vertex"):
 		"""
 		Creates an Edge between vertices <tail> and <head>.
 		"""
@@ -115,7 +114,7 @@ class Edge:
 	def head(self) -> Vertex:
 		return self._head
 
-	def otherend(self, oneend: Vertex) -> Vertex:
+	def otherend(self, oneend: "Vertex") -> "Vertex":
 		"""
 		Given one end Vertex <oneend> of the Edge <self>, this returns
 		the other end Vertex of <self>.
@@ -128,7 +127,7 @@ class Edge:
 		raise GraphError(
 			'Edge.otherend(oneend): oneend must be head or tail of Edge')
 
-	def incident(self, vertex: Vertex) -> bool:
+	def incident(self, vertex: "Vertex") -> bool:
 		"""
 		Returns True iff the Edge <self> is incident with the
 		Vertex <Vertex>.
@@ -189,14 +188,14 @@ class Graph():
 		else:
 			return self._E[:]  # return a *copy* of this list
 
-	def __getitem__(self, i) -> Vertex:
+	def __getitem__(self, i) -> "Vertex":
 		"""
 		Returns the <i>th Vertex of the Graph -- as given in the Vertex list;
 		this is not related to the Vertex labels.
 		"""
 		return self._V[i]
 
-	def addvertex(self, label: int = -1) -> Vertex:
+	def addvertex(self, label: int = -1) -> "Vertex":
 		"""
 		Add a Vertex to the Graph.
 		Optional argument: a Vertex label (arbitrary)
@@ -208,7 +207,7 @@ class Graph():
 		self._V.append(u)
 		return u
 
-	def addedge(self, tail: Vertex, head: Vertex) -> Edge:
+	def addedge(self, tail: "Vertex", head: "Vertex") -> "Edge":
 		"""
 		Add an Edge to the Graph between <tail> and <head>.
 		Includes some checks in case the Graph should stay simple.
@@ -233,7 +232,7 @@ class Graph():
 		self._E.append(e)
 		return e
 
-	def findedge(self, u: Vertex, v: Vertex) -> Edge:
+	def findedge(self, u: "Vertex", v: "Vertex") -> "Edge":
 		"""
 		If <u> and <v> are adjacent, this returns an Edge between them.
 		(Arbitrary in the case of multigraphs.)
@@ -244,7 +243,7 @@ class Graph():
 				return e
 		return None
 
-	def adj(self, u: Vertex, v: Vertex) -> bool:
+	def adj(self, u: "Vertex", v: "Vertex") -> bool:
 		"""
 		Returns True iff vertices <u> and <v> are adjacent.
 		"""
@@ -259,12 +258,12 @@ class Graph():
 		"""
 		return self._directed
 
-	def deledge(self, e: Edge):
+	def deledge(self, e: "Edge"):
 		self._E.remove(e)
 		e._head.internalDelEdge(e)
 		e._tail.internalDelEdge(e)
 
-	def delvertex(self, v: Vertex):
+	def delvertex(self, v: "Vertex"):
 		for e in v.inclist():
 			self.deledge(e)
 		self._V.remove(v)
