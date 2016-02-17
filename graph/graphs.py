@@ -139,6 +139,7 @@ class Edge:
 			return False
 
 
+#TODO: Create unit tests to confirm correct behaviour
 class Graph():
 	"""
 	A Graph object has as main attributes:
@@ -267,3 +268,26 @@ class Graph():
 		for e in v.inclist():
 			self.deledge(e)
 		self._V.remove(v)
+
+	def complement(self) -> "Graph":
+		c = Graph()
+		newVerts = {}
+		for v in self.V():
+			newVerts[v] = c.addvertex(v.label())
+		for v, newV in newVerts.items():
+			for w, newW in newVerts.items():
+				if v == w: continue
+				if not w.adj(v):
+					c.addedge(newV, newW)
+		return c
+
+	def clone(self) -> "Graph":
+		c = Graph()
+		newVerts = {}
+		for v in self.V():
+			newVerts[v] = c.addvertex(v.label())
+		for v, newV in newVerts.items():
+			for w, newW in newVerts.items():
+				if (v != w) and w.adj(v):
+					c.addedge(newV, newW)
+		return c
