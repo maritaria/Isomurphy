@@ -4,10 +4,22 @@ from isomorphism.IsomorphismChecker import IsomorphismChecker
 class ColorRefinementChecker(IsomorphismChecker):
 
     def isIsomorphic(self, graph1: Graph, graph2: Graph) -> bool:
-        graph1Colors = makeColors(graph1)
-        graph2Colors = makeColors(graph2)
-        # this is incorrect
-        return graph1Colors == graph2Colors
+        graph1Colors, degree1 = makeColors(graph1)
+        graph2Colors, degree2 = makeColors(graph2)
+        if degree1 != degree2:
+            return False
+        set1 = [set() for j in range(degree1)]
+        set2 = [set() for j in range(degree2)]
+        for i in range(len(graph1Colors)):
+            if len(graph1Colors[i]) > 0:
+                set1[graph1Colors[i].pop().deg()] = len(graph1Colors[i])
+        for i in range(len(graph2Colors)):
+            if len(graph2Colors[i]) > 0:
+                set2[graph2Colors[i].pop().deg()] = len(graph2Colors[i])
+        result = True
+        for i in range(degree1):
+            result = result and (set1[i] == set2[i])
+        return result
 
 def makeColors(graph: Graph):
 
@@ -18,8 +30,8 @@ def makeColors(graph: Graph):
         for vertex in vertices:
             vertex.colornum = degree
         currentColor = max(degree, currentColor)
-        
     currentColor += 1
+    maxDegree = currentColor
 
     #iterative step keep refining
     changed = True
@@ -45,10 +57,10 @@ def makeColors(graph: Graph):
                     currentColor += 1
 
             checkColor += 1
-    colors = [0] * currentColor
+    colors = [set() for i in range(currentColor)]
     for vertex in graph.V():
-        colors[vertex.colornum] += 1
-    return colors
+        colors[vertex.colornum].add(vertex)
+    return colors, maxDegree
 
 def getVerticesByDegree(graph : Graph) -> dict:
 
