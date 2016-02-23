@@ -30,13 +30,17 @@ def makeColors(graph: Graph):
             if len(allSameColor) > 0:
                 first = allSameColor.pop(0)
                 changedColor = False
+
+                verticesThatNeedAChange = set()
                 while len(allSameColor) > 0:
                     second = allSameColor.pop(0)
                     if not (equalNeighborhood(first, second)):
-                        second.color = currentColor
+                        verticesThatNeedAChange.add(second)
                         changed = True
                         changedColor = True
                 if changedColor:
+                    for vertex in verticesThatNeedAChange:
+                        vertex.color = currentColor
                     currentColor += 1
 
             checkColor += 1
