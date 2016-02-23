@@ -15,7 +15,7 @@ def makeColors(graph: Graph):
     currentColor = 0
     for degree, vertices in verticesDictionary.items():
         for vertex in vertices:
-            vertex.color = degree
+            vertex.colornum = degree
         currentColor = max(degree, currentColor)
         
     currentColor += 1
@@ -40,13 +40,13 @@ def makeColors(graph: Graph):
                         changedColor = True
                 if changedColor:
                     for vertex in verticesThatNeedAChange:
-                        vertex.color = currentColor
+                        vertex.colornum = currentColor
                     currentColor += 1
 
             checkColor += 1
     colors = [0] * currentColor
     for vertex in graph.V():
-        colors[vertex.color] += 1
+        colors[vertex.colornum] += 1
     return colors
 
 def getVerticesByDegree(graph : Graph) -> dict:
@@ -59,24 +59,24 @@ def getVerticesByDegree(graph : Graph) -> dict:
     return verticesDictionary
 
 def equalNeighborhood(vertex1 : Vertex, vertex2 : Vertex) -> bool:
-    return [v.color for v in quickSortByColor(vertex1.nbs())] == [v.color for v in quickSortByColor(vertex2.nbs())]
+    return [v.colornum for v in quickSortByColor(vertex1.nbs())] == [v.colornum for v in quickSortByColor(vertex2.nbs())]
 
 def quickSortByColor(items : list) -> list:
     if (len(items) == 0 or len(items) == 1):
         return items
     pivot = items.pop(0)
-    small, big = partition(items, pivot.color)
+    small, big = partition(items, pivot.colornum)
     return quickSortByColor(small) + [pivot] + quickSortByColor(big)
 
 def partition(items : list, discriminator : int) -> (list, list):
     left = []
     right = []
     for item in items:
-        if item.color < discriminator:
+        if item.colornum < discriminator:
             left.append(item)
         else:
             right.append(item)
     return left, right
 
-def getVerticesByColor(graph: Graph, color: int):
-    return [v for v in graph.V() if v.color == color]
+def getVerticesByColor(graph: Graph, colornum: int):
+    return [v for v in graph.V() if v.colornum == colornum]
