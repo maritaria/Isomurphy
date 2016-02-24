@@ -20,7 +20,7 @@ def addFirst(item, xs : list) -> list:
     return singleton(item) + xs
 
 def addLast(item, xs : list) -> list:
-    return list + singleton(item)
+    return xs + singleton(item)
 
 def isEmpty(xs : list) -> bool:
     return len(xs) == 0
@@ -102,6 +102,47 @@ def zipWith(combiner, xs : list, ys : list) -> list:
     else:
         return addFirst(combiner(head(xs), head(ys)), zipWith(combiner, tail(xs), tail(ys)))
 
+def take(n, xs : list) -> list:
+    return xs[:n]
+
+def drop(n, xs : list) -> list:
+    return xs[n:]
+
+def takeWhile(predicate, xs : list) -> list:
+    if isEmpty(xs):
+        return []
+    i = 0
+    result = []
+    while (i < len(xs)):
+        x = xs[i]
+        if predicate(x):
+            result.append(x)
+            i += 1
+        else:
+            return result
+
+def dropWhile(predicate, xs : list) -> list:
+    if (isEmpty(xs)):
+        return []
+    i = 0
+    result = xs.copy()
+    item = result[i]
+    while (predicate(item) and i < len(result)):
+        ++i
+        item = result[i]
+    return result[i:]
+
+def splitAt(n : int, xs : list) -> (list, list):
+    (left, right) = ([],[])
+    i = 0
+    while (i < n and i < len(xs)):
+        left.append(xs[i])
+        i += 1
+    while (i < len(xs)):
+        right.append(xs[i])
+        i += 1
+    return (left, right)
+
 def partition(predicate, xs) -> (list, list):
     left = []
     right = []
@@ -120,3 +161,22 @@ def quickSort(xs : list) -> list:
         rest = tail(xs)
         smaller, greater = partition(lambda item: item > pivot, rest)
         return quickSort(smaller) + [pivot] + quickSort(greater)
+
+def merge(xs : list, ys: list):
+    if (isEmpty(xs)):
+        return ys
+    if (isEmpty(ys)):
+        return xs
+    x = head(xs)
+    y = head(ys)
+    if (x > y):
+        return addFirst(y, merge(xs, tail(ys)))
+    else:
+        return addFirst(x, merge(tail(xs), ys))
+
+def mergeSort(zs : list):
+    if (len(zs) < 2):
+        return zs
+    else:
+        (xs, ys) = splitAt(len(zs) // 2, zs)
+        return merge(mergeSort(xs), mergeSort(ys))
