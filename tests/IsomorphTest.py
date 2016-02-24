@@ -61,5 +61,5 @@ class IsomorphTest(unittest.TestCase):
 		g1 = self._graphs[0][index1]
 		g2 = self._graphs[0][index2]
 		result = self._checker.isIsomorphic(g1,g2)
-		#print(index1, index2, result)
+		print(index1, index2, result)
 		self.assertEqual(expectedResult, result)
