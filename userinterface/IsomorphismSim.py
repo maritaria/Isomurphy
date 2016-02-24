@@ -82,20 +82,61 @@ class GraphCanvas(tk.Canvas):
 		self._edges[e] = shape
 
 	def adjust_size(self):
-		r = self._radius + GraphCanvas.VERTEX_SIZE
-		self.configure(scrollregion=(-r, -r, r, r), width= r*2, height= r*2)
+		x, y ,w, h = self.bbox(tk.ALL)
+		self.configure(scrollregion=(x,y,w,h))
+
+
+class GraphCanvasContainer(tk.Frame):
+	def __init__(self, master, g: Graph, cnf=None, **kwargs):
+		tk.Frame.__init__(self, master, cnf, **kwargs)
+
+		# setup scrollbars
+		self._hscroll = tk.Scrollbar(self, orient=tk.HORIZONTAL)
+		self._hscroll.grid(row=1, column=0, sticky=tk.EW)
+		self._vscroll = tk.Scrollbar(self, orient=tk.VERTICAL)
+		self._vscroll.grid(row=0, column=1, sticky=tk.NS)
+
+		# setup canvas
+		self._canvas = GraphCanvas(self, g, bg="yellow",
+		                           xscrollcommand=self._hscroll.set,
+		                           yscrollcommand=self._vscroll.set)
+		self._canvas.grid(row=0, column=0, sticky=tk.NSEW)
+		# This is what enables scrolling with the mouse:
+		self._canvas.bind("<ButtonPress-1>", self.canvas_grab)
+		self._canvas.bind("<B1-Motion>", self.canvas_drag)
+		self._canvas.bind("<MouseWheel>", self.canvas_zoom)
+		self._hscroll.config(command=self._canvas.xview)
+		self._vscroll.config(command=self._canvas.yview)
+		# make the canvas expandable
+		self.grid_rowconfigure(0, weight=1)
+		self.grid_columnconfigure(0, weight=1)
+		self._canvas.reset_graph()
+
+	def canvas_grab(self, event):
+		self._canvas.scan_mark(event.x, event.y)
+
+	def canvas_drag(self, event):
+		self._canvas.scan_dragto(event.x, event.y, gain=1)
+
+	def canvas_zoom(self, event):
+		print(event.delta)
+		delta = event.delta / 320
+		delta += 1
+		true_x = self._canvas.canvasx(event.x)
+		true_y = self._canvas.canvasy(event.y)
+		self._canvas.scale(tk.ALL, true_x, true_y , delta, delta)
+		x, y ,w, h = self._canvas.bbox(tk.ALL)
+		self._canvas.configure(scrollregion=(x,y,w,h))
 
 
 class IsomorphismSim:
 	def __init__(self, left: Graph, right: Graph):
-		self._leftGraph = left
-		self._rightGraph = right
+		self._left_graph = left
+		self._right_graph = right
 		self.create_ui()
 
 	def run(self):
 		self._window.mainloop()
-
-	# self._canvas.create_circle(100, 120, 50, fill="blue", outline="#DDD", width=4)
 
 	def create_ui(self):
 		self.create_ui_window()
@@ -109,43 +150,25 @@ class IsomorphismSim:
 		self._window.grid_columnconfigure(0, weight=1)
 
 	def create_ui_canvas(self):
-		# create root
-		self._frame = tk.Frame(self._window)
-		self._frame.grid(row=0, sticky=tk.NSEW)
-
-		# setup scrollbars
-		self._vscroll = tk.Scrollbar(self._frame, orient=tk.VERTICAL)
-		# self._vscroll.pack(side=tk.BOTTOM, fill=tk.X)
-		self._vscroll.grid(row=0, column=1, sticky=tk.NS)
-		self._hscroll = tk.Scrollbar(self._frame, orient=tk.HORIZONTAL)
-		# self._hscroll.pack(side=tk.RIGHT, fill=tk.Y)
-		self._hscroll.grid(row=1, column=0, sticky=tk.EW)
-
-		# setup canvas
-		self._canvas = GraphCanvas(self._frame, self._leftGraph, xscrollcommand=self._hscroll.set,
-		                           yscrollcommand=self._vscroll.set, width=100, height=100, bg="yellow")
-		# self._canvas.pack(fill=tk.BOTH)
-		self._canvas.grid(row=0, column=0)
-		# make the canvas expandable
-		self._frame.grid_rowconfigure(0, weight=1)
-		self._frame.grid_columnconfigure(0, weight=1)
-		self._canvas.reset_graph()
-
-	# self._canvas = tk.Canvas(self._frame, width=200, height=200, bd=2, relief=tk.RIDGE, bg="RED")
-	# self._canvas.grid(row=0)
+		self._containers = tk.PanedWindow(self._window, sashwidth=8, bg="#DDD")
+		self._containers.grid(row=0, sticky=tk.NSEW)
+		self._left_container = GraphCanvasContainer(self._containers, self._left_graph)
+		self._containers.add(self._left_container, stretch="always")
+		self._right_container = GraphCanvasContainer(self._containers, self._right_graph)
+		self._containers.add(self._right_container, stretch="always")
 
 	def create_ui_toolbar(self):
 		self._stepbutton = tk.Button(self._window, text="Perform step", command=lambda: self.perform_step())
 		self._stepbutton.grid(row=1, sticky=tk.SW)
 
 	def perform_step(self):
-		self._canvas._graph.addvertex()
-		self._canvas.reset_graph()
+		self._left_container._canvas._graph.addvertex()
+		self._left_container._canvas.reset_graph()
+		self._right_container._canvas._graph.addvertex()
+		self._right_container._canvas.reset_graph()
 
-
-# TODO: New class for drawing a graph
 
 graphs = loadgraph("../tests/data/colorref_smallexample_6_15.grl", True)
 
-sim = IsomorphismSim(Graph(1), None)
+sim = IsomorphismSim(Graph(1), Graph(2))
 sim.run()
