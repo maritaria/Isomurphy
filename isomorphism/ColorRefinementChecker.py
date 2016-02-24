@@ -6,7 +6,7 @@ class ColorRefinementChecker(IsomorphismChecker):
     def isIsomorphic(self, graph1: Graph, graph2: Graph) -> bool:
         graph1Colors, graph2Colors = makeColors(graph1, graph2)
         result = graph1Colors == graph2Colors
-        return result
+        return result, graph1Colors
 
 def makeColors(graph: Graph, graph2: Graph):
 
@@ -15,7 +15,10 @@ def makeColors(graph: Graph, graph2: Graph):
     currentColor = 0
     for degree, vertices in verticesDictionary.items():
         for vertex in vertices:
-            vertex.colornum = degree
+            if not hasattr(vertex, 'colornum'):
+                vertex.colornum = degree
+            else:
+                currentColor = max(vertex.colornum, currentColor)
         currentColor = max(degree, currentColor)
     currentColor += 1
     maxDegree = currentColor
