@@ -40,27 +40,30 @@ class GraphCanvas(tk.Canvas):
 		self._vertexPositions = {}
 		for v in self._graph.V():
 			self.addVertex(v)
+		self.prepare_layout()
 		self.layout_vertices()
 		for e in self._graph.E():
 			self.addEdge(e)
+		self.adjust_size()
 
 	def addVertex(self, v: Vertex):
 		print("Vertex %s" % v)
 		shape = self.create_oval(0, 0, 50, 50, fill="#F00", outline="black")
 		self._vertices[v] = shape
 
-	def layout_vertices(self):
+	def prepare_layout(self):
 		verticesCount = len(self._vertices)
-		anglePerVertex = (2 * math.pi) / verticesCount
-		radius = math.tan(anglePerVertex) * GraphCanvas.VERTEX_DISTANCE
-		radius = max(GraphCanvas.VERTEX_DISTANCE, radius)
-		center = radius + GraphCanvas.VERTEX_SIZE
+		self._anglePerVertex = (2 * math.pi) / verticesCount
+		self._radius = verticesCount * GraphCanvas.VERTEX_DISTANCE / (2 * math.pi)
+		self._radius = max(self._radius, 3 * GraphCanvas.VERTEX_DISTANCE / (2 * math.pi))
+
+	def layout_vertices(self):
 		currentAngle = 0
 		for v, shape in self._vertices.items():
-			x = center + (math.cos(currentAngle) * radius)
-			y = center + (math.sin(currentAngle) * radius)
+			x = (math.cos(currentAngle) * self._radius)
+			y = (math.sin(currentAngle) * self._radius)
 			self.place_vertex(v, x, y)
-			currentAngle += anglePerVertex
+			currentAngle += self._anglePerVertex
 
 	def place_vertex(self, v, x, y):
 		shape = self._vertices[v]
@@ -77,6 +80,10 @@ class GraphCanvas(tk.Canvas):
 		x2, y2 = self._vertexPositions[e.tail()]
 		shape = self.create_line(x1, y1, x2, y2, fill="black", width=5)
 		self._edges[e] = shape
+
+	def adjust_size(self):
+		r = self._radius + GraphCanvas.VERTEX_SIZE
+		self.configure(scrollregion=(-r, -r, r, r), width= r*2, height= r*2)
 
 
 class IsomorphismSim:
@@ -116,12 +123,9 @@ class IsomorphismSim:
 
 		# setup canvas
 		self._canvas = GraphCanvas(self._frame, self._leftGraph, xscrollcommand=self._hscroll.set,
-		                           yscrollcommand=self._vscroll.set, width=100, height=100)
+		                           yscrollcommand=self._vscroll.set, width=100, height=100, bg="yellow")
 		# self._canvas.pack(fill=tk.BOTH)
-		self._canvas.grid(row=0, column=0, sticky=tk.NSEW)
-
-		self._vscroll.config(command=self._canvas.yview)
-		self._hscroll.config(command=self._canvas.xview)
+		self._canvas.grid(row=0, column=0)
 		# make the canvas expandable
 		self._frame.grid_rowconfigure(0, weight=1)
 		self._frame.grid_columnconfigure(0, weight=1)
@@ -135,12 +139,13 @@ class IsomorphismSim:
 		self._stepbutton.grid(row=1, sticky=tk.SW)
 
 	def perform_step(self):
-		print("Hello World")
+		self._canvas._graph.addvertex()
+		self._canvas.reset_graph()
 
 
 # TODO: New class for drawing a graph
 
 graphs = loadgraph("../tests/data/colorref_smallexample_6_15.grl", True)
 
-sim = IsomorphismSim(graphs[0][0], None)
+sim = IsomorphismSim(Graph(1), None)
 sim.run()
