@@ -112,25 +112,25 @@ def takeWhile(predicate, xs : list) -> list:
     if isEmpty(xs):
         return []
     i = 0
-    result = []
     while (i < len(xs)):
         x = xs[i]
         if predicate(x):
-            result.append(x)
             i += 1
         else:
-            return result
+            break;
+    return take(i, xs)
 
 def dropWhile(predicate, xs : list) -> list:
-    if (isEmpty(xs)):
+    if isEmpty(xs):
         return []
     i = 0
-    result = xs.copy()
-    item = result[i]
-    while (predicate(item) and i < len(result)):
-        ++i
-        item = result[i]
-    return result[i:]
+    while (i < len(xs)):
+        x = xs[i]
+        if predicate(x):
+            i += 1
+        else:
+            break;
+    return drop(i, xs)
 
 def splitAt(n : int, xs : list) -> (list, list):
     (left, right) = ([],[])
