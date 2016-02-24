@@ -49,6 +49,10 @@ def concat(xss : list) -> list:
     else:
         return head(xss) + concat(tail(xss))
 
+def forEach(consumer, iterable):
+    for item in iterable:
+        consumer(item)
+
 def filter(predicate, xs: list) -> list:
     return [x for x in xs if predicate(x)]
 
@@ -126,6 +130,13 @@ def zip(xs : list, ys : list) -> list:
         return []
     else:
         return addFirst((head(xs), head(ys)), zip(tail(xs), tail(ys)))
+
+def unzip(zs : list) -> (list, list):
+    (left, right) = ([], [])
+    for (x, y) in zs:
+        left.append(x)
+        right.append(y)
+    return (left, right)
 
 def zipWith(combiner, xs : list, ys : list) -> list:
     if isEmpty(xs):
