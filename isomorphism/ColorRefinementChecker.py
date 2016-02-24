@@ -26,28 +26,7 @@ def makeColors(graph: Graph, graph2: Graph):
     #iterative step keep refining
     changed = True
     while changed:
-        checkColor = 0
-        changed = False
-        while checkColor < currentColor:
-            allSameColor = getVerticesByColor(graph, checkColor)
-            allSameColor += getVerticesByColor(graph2, checkColor)
-            if len(allSameColor) > 0:
-                first = allSameColor.pop(0)
-                changedColor = False
-
-                verticesThatNeedAChange = set()
-                while len(allSameColor) > 0:
-                    second = allSameColor.pop(0)
-                    if not (equalNeighborhood(first, second)):
-                        verticesThatNeedAChange.add(second)
-                        changed = True
-                        changedColor = True
-                if changedColor:
-                    for vertex in verticesThatNeedAChange:
-                        vertex.colornum = currentColor
-                    currentColor += 1
-
-            checkColor += 1
+        changed, currentColor = colorIteration(changed, currentColor, graph, graph2)
     colors = [0] * currentColor
     colors2 = [0] * currentColor
     for vertex in graph.V():
@@ -55,6 +34,33 @@ def makeColors(graph: Graph, graph2: Graph):
     for vertex in graph2.V():
         colors2[vertex.colornum] += 1
     return colors, colors2
+
+
+def colorIteration(changed, currentColor, graph, graph2):
+    checkColor = 0
+    changed = False
+    while checkColor < currentColor:
+        allSameColor = getVerticesByColor(graph, checkColor)
+        allSameColor += getVerticesByColor(graph2, checkColor)
+        if len(allSameColor) > 0:
+            first = allSameColor.pop(0)
+            changedColor = False
+
+            verticesThatNeedAChange = set()
+            while len(allSameColor) > 0:
+                second = allSameColor.pop(0)
+                if not (equalNeighborhood(first, second)):
+                    verticesThatNeedAChange.add(second)
+                    changed = True
+                    changedColor = True
+            if changedColor:
+                for vertex in verticesThatNeedAChange:
+                    vertex.colornum = currentColor
+                currentColor += 1
+
+        checkColor += 1
+    return changed, currentColor
+
 
 def getVerticesByDegree(graph : Graph, graph2: Graph) -> dict:
 
