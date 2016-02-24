@@ -1,5 +1,17 @@
-def id(xs):
-    return xs
+id = lambda x: x
+
+plus = lambda x, y: x + y
+minus = lambda x, y: x - y
+mult = lambda x, y: x * y
+div = lambda x, y: x / y
+intdiv = lambda x, y: x // y
+pow = lambda x, y: x ** y
+
+eq = lambda x, y: x == y
+gt = lambda x, y: x > y
+st = lambda x, y: x < y
+gteq = lambda x, y: x >= y
+steq = lambda x, y: x <= y
 
 def head(xs : list) -> list:
     return xs[0]
@@ -70,6 +82,27 @@ def foldRight(function, initial, items : list):
         return initial
     else:
         return function(last(items), foldRight(function, initial, init(items)))
+
+def flatMap(generator, xs : list) -> list:
+    return foldLeft(concat, [], map(generator, xs))
+
+def sum(xs : list):
+    return foldLeft(plus, 0, xs)
+
+def product(xs : list):
+    return foldLeft(mult, 1, xs)
+
+def minimum(xs : list):
+    if (len(xs) == 1):
+        return head(xs)
+    else:
+        return min(head(xs), minimum(tail(xs)))
+
+def maximum(xs : list):
+    if (len(xs) == 1):
+        return head(xs)
+    else:
+        return max(head(xs), maximum(tail(xs)))
 
 def allMatch(predicate, items : list) -> bool:
     for item in items:
@@ -153,16 +186,7 @@ def partition(predicate, xs) -> (list, list):
             left.append(x)
     return left, right
 
-def quickSort(xs : list) -> list:
-    if isEmpty(xs):
-        return []
-    else:
-        pivot = head(xs)
-        rest = tail(xs)
-        smaller, greater = partition(lambda item: item > pivot, rest)
-        return quickSort(smaller) + [pivot] + quickSort(greater)
-
-def merge(xs : list, ys: list):
+def merge(xs : list, ys: list) -> list:
     if (isEmpty(xs)):
         return ys
     if (isEmpty(ys)):
@@ -174,9 +198,18 @@ def merge(xs : list, ys: list):
     else:
         return addFirst(x, merge(tail(xs), ys))
 
-def mergeSort(zs : list):
+def mergeSort(zs : list) -> list:
     if (len(zs) < 2):
         return zs
     else:
         (xs, ys) = splitAt(len(zs) // 2, zs)
         return merge(mergeSort(xs), mergeSort(ys))
+
+def quickSort(xs : list) -> list:
+    if isEmpty(xs):
+        return []
+    else:
+        pivot = head(xs)
+        rest = tail(xs)
+        smaller, greater = partition(lambda item: item > pivot, rest)
+        return quickSort(smaller) + [pivot] + quickSort(greater)
