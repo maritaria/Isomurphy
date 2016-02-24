@@ -232,6 +232,9 @@ class Graph():
 		self._E.append(e)
 		return e
 
+	def addedge_simple(self, tail:int,head:int)->"Edge":
+		return self.addedge(self.findvertex(tail), self.findvertex(head))
+
 	def findvertex(self, label : int) -> "Vertex":
 		for v in self.V():
 			if v.label() == label:
