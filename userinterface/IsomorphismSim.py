@@ -114,18 +114,18 @@ class IsomorphismSim:
 		self._frame.grid(row=0, sticky=tk.NSEW)
 
 		# setup scrollbars
-		self._vscroll = tk.Scrollbar(self._frame, orient=tk.VERTICAL)
-		# self._vscroll.pack(side=tk.BOTTOM, fill=tk.X)
-		self._vscroll.grid(row=0, column=1, sticky=tk.NS)
 		self._hscroll = tk.Scrollbar(self._frame, orient=tk.HORIZONTAL)
-		# self._hscroll.pack(side=tk.RIGHT, fill=tk.Y)
 		self._hscroll.grid(row=1, column=0, sticky=tk.EW)
+		self._vscroll = tk.Scrollbar(self._frame, orient=tk.VERTICAL)
+		self._vscroll.grid(row=0, column=1, sticky=tk.NS)
 
 		# setup canvas
 		self._canvas = GraphCanvas(self._frame, self._leftGraph, xscrollcommand=self._hscroll.set,
 		                           yscrollcommand=self._vscroll.set, width=100, height=100, bg="yellow")
 		# self._canvas.pack(fill=tk.BOTH)
 		self._canvas.grid(row=0, column=0)
+		self._hscroll.config(command=self._canvas.xview)
+		self._vscroll.config(command=self._canvas.yview)
 		# make the canvas expandable
 		self._frame.grid_rowconfigure(0, weight=1)
 		self._frame.grid_columnconfigure(0, weight=1)
