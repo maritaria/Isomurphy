@@ -254,7 +254,7 @@ def quickSortBy(xs : list, comparator) -> list:
         pivot = head(xs)
         rest = tail(xs)
         smaller, greater = partition(lambda item: comparator(item, pivot) > 0, rest)
-        return quickSort(smaller) + [pivot] + quickSort(greater)
+        return quickSortBy(smaller, comparator) + [pivot] + quickSortBy(greater, comparator)
 
 def minBy(comparator, x, y):
     if (comparator(x, y) < 0):
