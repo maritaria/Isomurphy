@@ -67,7 +67,7 @@ def intersperse(item, xs : list) -> list:
         return addFirst(head(xs),addFirst(item, intersperse(item, tail(xs))))
 
 def intercalate(xs : list, xss : list) -> list:
-    return concatMany((intersperse(xs,xss)))
+    return concatMany(intersperse(xs,xss))
 
 def powerset(items : list) -> list:
     if (isEmpty(items)):
@@ -164,7 +164,7 @@ def takeWhile(predicate, xs : list) -> list:
         if predicate(x):
             i += 1
         else:
-            break;
+            break
     return take(i, xs)
 
 def dropWhile(predicate, xs : list) -> list:
@@ -176,7 +176,7 @@ def dropWhile(predicate, xs : list) -> list:
         if predicate(x):
             i += 1
         else:
-            break;
+            break
     return drop(i, xs)
 
 def splitAt(n : int, xs : list) -> (list, list):
@@ -238,7 +238,7 @@ def mergeBy(xs : list, ys : list, comparator) -> list:
     if (comparator(x, y) > 0):
         return addFirst(y, mergeBy(xs, tail(ys), comparator))
     else:
-        return addFirst(x, mergeBy(tail(xs), ys), comparator)
+        return addFirst(x, mergeBy(tail(xs), ys, comparator))
 
 def mergeSortBy(zs : list, comparator) -> list:
     if (len(zs) < 2):
