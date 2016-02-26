@@ -1,4 +1,5 @@
 id = lambda x: x
+negate = lambda x: not x
 
 plus = lambda x, y: x + y
 minus = lambda x, y: x - y
@@ -8,6 +9,7 @@ intdiv = lambda x, y: x // y
 pow = lambda x, y: x ** y
 
 eq = lambda x, y: x == y
+neq = lambda x, y: x != y
 gt = lambda x, y: x > y
 st = lambda x, y: x < y
 gteq = lambda x, y: x >= y
@@ -43,15 +45,16 @@ def map(function, xs : list) -> list:
 def reverse(xs : list) -> list:
     return xs[::-1]
 
-def concat(xss : list) -> list:
-    if (isEmpty(xss)):
-        return []
-    else:
-        return head(xss) + concat(tail(xss))
+def concat(xs : list, ys : list) -> list:
+    return xs + ys
+
+def concatMany(zss : list) -> list:
+    return foldLeft(concat, [], zss)
 
 def forEach(consumer, iterable):
     for item in iterable:
         consumer(item)
+    return iterable
 
 def filter(predicate, xs: list) -> list:
     return [x for x in xs if predicate(x)]
@@ -64,7 +67,7 @@ def intersperse(item, xs : list) -> list:
         return addFirst(head(xs),addFirst(item, intersperse(item, tail(xs))))
 
 def intercalate(xs : list, xss : list) -> list:
-    return concat((intersperse(xs,xss)))
+    return concatMany((intersperse(xs,xss)))
 
 def powerset(items : list) -> list:
     if (isEmpty(items)):
@@ -88,7 +91,7 @@ def foldRight(function, initial, items : list):
         return function(last(items), foldRight(function, initial, init(items)))
 
 def flatMap(generator, xs : list) -> list:
-    return foldLeft(concat, [], map(generator, xs))
+    return foldLeft(concatMany, [], map(generator, xs))
 
 def sum(xs : list):
     return foldLeft(plus, 0, xs)
@@ -197,7 +200,7 @@ def partition(predicate, xs) -> (list, list):
             left.append(x)
     return left, right
 
-def merge(xs : list, ys: list) -> list:
+def merge(xs : list, ys : list) -> list:
     if (isEmpty(xs)):
         return ys
     if (isEmpty(ys)):
@@ -224,3 +227,49 @@ def quickSort(xs : list) -> list:
         rest = tail(xs)
         smaller, greater = partition(lambda item: item > pivot, rest)
         return quickSort(smaller) + [pivot] + quickSort(greater)
+
+def mergeBy(xs : list, ys : list, comparator) -> list:
+    if (isEmpty(xs)):
+        return ys
+    if (isEmpty(ys)):
+        return xs
+    x = head(xs)
+    y = head(ys)
+    if (comparator(x, y) > 0):
+        return addFirst(y, mergeBy(xs, tail(ys), comparator))
+    else:
+        return addFirst(x, mergeBy(tail(xs), ys), comparator)
+
+def mergeSortBy(zs : list, comparator) -> list:
+    if (len(zs) < 2):
+        return zs
+    else:
+        (xs, ys) = splitAt(len(zs) // 2, zs)
+        return mergeBy(mergeSortBy(xs, comparator), mergeSortBy(ys, comparator), comparator)
+
+def quickSortBy(xs : list, comparator) -> list:
+    if isEmpty(xs):
+        return []
+    else:
+        pivot = head(xs)
+        rest = tail(xs)
+        smaller, greater = partition(lambda item: comparator(item, pivot) > 0, rest)
+        return quickSort(smaller) + [pivot] + quickSort(greater)
+
+def minBy(comparator, x, y):
+    if (comparator(x, y) < 0):
+        return x
+    else:
+        return y
+
+def maxBy(comparator, x, y):
+    if (comparator(x, y) > 0):
+        return x
+    else:
+        return y
+
+def minimumBy(xs : list, comparator):
+    return foldLeft(lambda x, y : minBy(comparator, x, y), head(xs), tail(xs))
+
+def maximumBy(xs : list, comparator):
+    return foldLeft(lambda x, y : maxBy(comparator, x, y), head(xs), tail(xs))
