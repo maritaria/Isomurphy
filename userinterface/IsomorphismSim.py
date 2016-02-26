@@ -4,6 +4,8 @@ import math
 
 from graph.graphIO import loadgraph
 from graph.graphs import Graph, Vertex, Edge
+from isomorphism import ColorRefinementChecker
+from isomorphism.SimulatingColorRefinementChecker import SimulatingColorRefinementChecker
 
 
 def _create_circle(self, x, y, r, **kwargs):
@@ -28,9 +30,10 @@ class GraphCanvas(tk.Canvas):
 	VERTEX_HALFSIZE = 25
 	VERTEX_DISTANCE = 75
 
-	def __init__(self, master, g: Graph, cnf=None, **kwargs):
+	def __init__(self, master, g: Graph, checker : SimulatingColorRefinementChecker, cnf=None, **kwargs):
 		tk.Canvas.__init__(self, master, cnf, **kwargs)
 		self._graph = g
+		self._checker = checker
 		self.reset_graph()
 
 	def reset_graph(self):
@@ -38,18 +41,49 @@ class GraphCanvas(tk.Canvas):
 		self._vertices = {}
 		self._edges = {}
 		self._vertexPositions = {}
+		self._labels = {}
+		self._colors = self._checker.getColors(self._graph)
+		self._oldColors = {}
 		for v in self._graph.V():
 			self.addVertex(v)
 		self.prepare_layout()
 		self.layout_vertices()
 		for e in self._graph.E():
 			self.addEdge(e)
+		self.lower_edges()
 		self.adjust_size()
+
+	def update_graph(self):
+		self._oldColors = self._colors
+		self._colors = self._checker.getColors(self._graph)
+		for v in self._graph.V():
+			self.update_color(v)
+
+	def update_color(self, v):
+		oldColor = self._oldColors.get(v, -1)
+		newColor = self._colors.get(v, -1)
+		label = self._labels[v]
+		self.itemconfig(label, text= newColor)
+		if oldColor!=newColor:
+			self.update_color_new(v)
+		else:
+			self.update_color_old(v)
+
+
+	def update_color_old(self, v):
+		shape = self._vertices[v]
+		self.itemconfig(shape, fill="#FFF")
+
+	def update_color_new(self, v):
+		shape = self._vertices[v]
+		self.itemconfig(shape, fill="#FDD")
 
 	def addVertex(self, v: Vertex):
 		print("Vertex %s" % v)
-		shape = self.create_oval(0, 0, 50, 50, fill="#F00", outline="black")
+		shape = self.create_oval(0, 0, 50, 50, fill="#FFF", outline="black")
+		label = self.create_text(0,0, text= self._colors[v], font=("Arial", 24))
 		self._vertices[v] = shape
+		self._labels[v] = label
 
 	def prepare_layout(self):
 		verticesCount = len(self._vertices)
@@ -67,12 +101,15 @@ class GraphCanvas(tk.Canvas):
 
 	def place_vertex(self, v, x, y):
 		shape = self._vertices[v]
+		label = self._labels[v]
 		x1 = x - GraphCanvas.VERTEX_HALFSIZE
 		y1 = y - GraphCanvas.VERTEX_HALFSIZE
 		x2 = x1 + GraphCanvas.VERTEX_SIZE
 		y2 = y1 + GraphCanvas.VERTEX_SIZE
 		self.coords(shape, x1, y1, x2, y2)
+		self.coords(label, x, y)
 		self._vertexPositions[v] = (x, y)
+
 
 	def addEdge(self, e: Edge):
 		print("Edge %s" % e)
@@ -85,9 +122,14 @@ class GraphCanvas(tk.Canvas):
 		x, y ,w, h = self.bbox(tk.ALL)
 		self.configure(scrollregion=(x,y,w,h))
 
+	def lower_edges(self):
+		for edge, shape in self._edges.items():
+			self.lower(shape)
+
+
 
 class GraphCanvasContainer(tk.Frame):
-	def __init__(self, master, g: Graph, cnf=None, **kwargs):
+	def __init__(self, master, g: Graph, checker : SimulatingColorRefinementChecker, cnf=None, **kwargs):
 		tk.Frame.__init__(self, master, cnf, **kwargs)
 
 		# setup scrollbars
@@ -97,7 +139,7 @@ class GraphCanvasContainer(tk.Frame):
 		self._vscroll.grid(row=0, column=1, sticky=tk.NS)
 
 		# setup canvas
-		self._canvas = GraphCanvas(self, g, bg="yellow",
+		self._canvas = GraphCanvas(self, g, checker, bg="yellow",
 		                           xscrollcommand=self._hscroll.set,
 		                           yscrollcommand=self._vscroll.set)
 		self._canvas.grid(row=0, column=0, sticky=tk.NSEW)
@@ -133,6 +175,8 @@ class IsomorphismSim:
 	def __init__(self, left: Graph, right: Graph):
 		self._left_graph = left
 		self._right_graph = right
+		self._checker = SimulatingColorRefinementChecker(left, right)
+		self._checker.prepare()
 		self.create_ui()
 
 	def run(self):
@@ -152,9 +196,9 @@ class IsomorphismSim:
 	def create_ui_canvas(self):
 		self._containers = tk.PanedWindow(self._window, sashwidth=8, bg="#DDD")
 		self._containers.grid(row=0, sticky=tk.NSEW)
-		self._left_container = GraphCanvasContainer(self._containers, self._left_graph)
+		self._left_container = GraphCanvasContainer(self._containers, self._left_graph, self._checker)
 		self._containers.add(self._left_container, stretch="always")
-		self._right_container = GraphCanvasContainer(self._containers, self._right_graph)
+		self._right_container = GraphCanvasContainer(self._containers, self._right_graph, self._checker)
 		self._containers.add(self._right_container, stretch="always")
 
 	def create_ui_toolbar(self):
@@ -162,13 +206,12 @@ class IsomorphismSim:
 		self._stepbutton.grid(row=1, sticky=tk.SW)
 
 	def perform_step(self):
-		self._left_container._canvas._graph.addvertex()
-		self._left_container._canvas.reset_graph()
-		self._right_container._canvas._graph.addvertex()
-		self._right_container._canvas.reset_graph()
+		self._checker.step()
+		self._left_container._canvas.update_graph()
+		self._right_container._canvas.update_graph()
 
 
 graphs = loadgraph("../tests/data/colorref_smallexample_6_15.grl", True)
 
-sim = IsomorphismSim(Graph(1), Graph(2))
+sim = IsomorphismSim(graphs[0][0], graphs[0][2])
 sim.run()

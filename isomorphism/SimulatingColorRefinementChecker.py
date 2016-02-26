@@ -65,9 +65,12 @@ class SimulatingColorRefinementChecker:
 		return result
 
 	def getColors(self, g: Graph) -> dict:
-		result = []
+		result = {}
 		for v in g.V():
-			result[v] = v.colornum
+			if hasattr(v, "colornum"):
+				result[v] = v.colornum
+			else:
+				result[v] = -1
 		return result
 
 	def isIsomorphic(self) -> bool:
