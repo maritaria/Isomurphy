@@ -19,38 +19,35 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 class Splitter:
 
     def split(self, graph : Graph) -> list:
-
-        #TODO returns the components of a graph if the graph is not connected, otherwise returns a singleton component (the graph itself)
         components = []
         verticesToGo = graph.V()
+
+        for v in graph.V():
+            v._found = False
+        for e in graph.E():
+            e._found = False
 
         while(not isEmpty(verticesToGo)):
             component = self.breadthFirstFind(verticesToGo)
             components.append(component)
-
             verticesToGo = filter(lambda v: not v._found, verticesToGo)
 
         for v in graph.V():
             del v._found
         for e in graph.E():
             del e._found
-        
+
         return components
 
     def breadthFirstFind(self, vertices : list) -> Component:
 
-        for vertex in vertices:
-            vertex._found = False
-            for edge in vertex.inclist:
-                edge._found = False
-
-        (foundVertices, foundEdges) = ([], [])
+        foundVertices, foundEdges = [], []
 
         def markFoundAndAppend(v : Vertex):
             v._found = True
             foundVertices.append(v)
 
-            newIncidents = filter(lambda e: not e._found, vertex.inclist())
+            newIncidents = filter(lambda e: not e._found, v.inclist())
 
             for e in newIncidents:
                 e._found = True
