@@ -22,30 +22,49 @@ class Splitter:
 
         #TODO returns the components of a graph if the graph is not connected, otherwise returns a singleton component (the graph itself)
         components = []
+        verticesToGo = graph.V()
 
+        while(not isEmpty(verticesToGo)):
+            component = self.breadthFirstFind(verticesToGo)
+            components.append(component)
+
+            verticesToGo = filter(lambda v: not v._found, verticesToGo)
+
+        for v in graph.V():
+            del v._found
+        for e in graph.E():
+            del e._found
+        
         return components
 
-    def breadthFirstFind(self, graph : Graph) -> list:
+    def breadthFirstFind(self, vertices : list) -> Component:
 
-        for vertex in graph.V():
-            vertex.found = False
+        for vertex in vertices:
+            vertex._found = False
+            for edge in vertex.inclist:
+                edge._found = False
 
-        vertex = graph.V().pop(0)
-
-        foundVertices = []
+        (foundVertices, foundEdges) = ([], [])
 
         def markFoundAndAppend(v : Vertex):
-            v.found = True
+            v._found = True
             foundVertices.append(v)
 
-        queue = [vertex]
+            newIncidents = filter(lambda e: not e._found, vertex.inclist())
+
+            for e in newIncidents:
+                e._found = True
+            foundEdges.extend(newIncidents)
+
+        queue = [vertices[0]]
 
         while (not isEmpty(queue)):
-            newNeighbours = filter(lambda v: not v.found, vertex.nbs())
-            queue = concat(queue, newNeighbours)
-            markFoundAndAppend(queue.pop(0))
+            vertex = queue.pop(0)
+            newNeighbours = filter(lambda v: not v._found, vertex.nbs())
+            queue.extend(newNeighbours)
+            markFoundAndAppend(vertex)
 
-        return foundVertices
+        return Component(foundVertices, foundEdges)
 
 class Partitioner:
 
@@ -53,7 +72,7 @@ class Partitioner:
         #TODO
         pass
 
-    def parition(self, graph : Graph) -> list:
+    def partition(self, graph : Graph) -> list:
         #returns a list of color classes TODO
         pass
 
@@ -66,14 +85,23 @@ class ColorClass:
     def predecendents(self) -> ColorClass:
         #TODO
 
-        return ColorClass()
+        pass
 
 class Component:
 
     #represents a connected subgraph of a graph. TODO
     #can have color class information.
 
-    def __init__(self):
+    def __init__(self, vertices=[], edges=[]):
         self.colorClasses = []
-        self.V = []
-        self.E = []
+        self._V = vertices
+        self._E = edges
+
+    def V(self):
+        return self._V
+
+    def E(self):
+        return self._E
+
+    def colorClasses(self):
+        return self.colorClasses
