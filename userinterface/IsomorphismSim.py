@@ -119,7 +119,7 @@ class GraphCanvas(tk.Canvas):
 		self._edges[e] = shape
 
 	def adjust_size(self):
-		x, y ,w, h = self.bbox(tk.ALL)
+		x, y, w, h = self.bbox(tk.ALL)
 		self.configure(scrollregion=(x,y,w,h))
 
 	def lower_edges(self):
@@ -213,5 +213,5 @@ class IsomorphismSim:
 
 graphs = loadgraph("../tests/data/colorref_smallexample_6_15.grl", True)
 
-sim = IsomorphismSim(graphs[0][0], graphs[0][2])
-sim.run()
+# sim = IsomorphismSim(graphs[0][0], graphs[0][2])
+# sim.run()
