@@ -3,9 +3,11 @@ from isomorphism.IsomorphismChecker import IsomorphismChecker
 
 class ColorRefinementChecker(IsomorphismChecker):
 
-    def isIsomorphic(self, graph1: Graph, graph2: Graph) -> bool:
+    def isIsomorphic(self, graph1: Graph, graph2: Graph) -> (bool, list):
         graph1Colors, graph2Colors = makeColors(graph1, graph2)
         result = graph1Colors == graph2Colors
+        #graph1Colors = list of number of vertices per color. index = color, element = number of vertices for that colour
+        #result = false if the graphs are not isomorphick, true if they could be isomorphic
         return result, graph1Colors
 
 def makeColors(graph: Graph, graph2: Graph):
