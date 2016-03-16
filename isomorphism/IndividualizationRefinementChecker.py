@@ -1,6 +1,7 @@
 import copy
 
 from graph.graphs import Graph
+from isomorphism.FastPartitionRefinement import FastPartitionRefinementChecker
 from isomorphism.IsomorphismChecker import IsomorphismChecker
 from isomorphism.ColorRefinementChecker import ColorRefinementChecker
 from isomorphism.ColorRefinementChecker import getVerticesByColor
@@ -10,7 +11,7 @@ from userinterface import IsomorphismSim
 class IndividualizationRefinementChecker(IsomorphismChecker):
 
     def isIsomorphic(self, graph1: Graph, graph2: Graph) -> bool:
-        checker = ColorRefinementChecker()
+        checker = FastPartitionRefinementChecker()
         result, colorList = checker.isIsomorphic(graph1, graph2)
         if not result:
             return False

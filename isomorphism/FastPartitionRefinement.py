@@ -1,230 +1,148 @@
 from graph.graphs import Graph, Vertex, Edge
+from isomorphism.ColorRefinementChecker import makeColors, countColors
 from isomorphism.IsomorphismChecker import IsomorphismChecker
 from utils.lists import *
 
+
 class FastPartitionRefinementChecker(IsomorphismChecker):
+	# Override
+	def isIsomorphic(self, graph1: Graph, graph2: Graph) -> (bool, list):
 
-	#Override
-	def isIsomorphic(self, graph1: Graph, graph2: Graph) -> bool:
+		self.partition(graph1)
+		self.partition(graph2)
 
-		splitter = Splitter()
-		components1 = splitter.split(graph1.clone())
-		components2 = splitter.split(graph2.clone())
+		colors1, colors2 = countColors(len(graph1.V()) * len(graph1.V()), graph1, graph2)
 
-		groupedComponents1 = {}
-		for comp in components1:
-			id = (len(comp.V()), len(comp.E()))
-			list = groupedComponents1.get(id, [])
-			list.append(comp)
-		groupedComponents2 = {}
-		for comp in components2:
-			id = (len(comp.V()), len(comp.E()))
-			list = groupedComponents2.get(id, [])
-			list.append(comp)
+		return colors1 == colors2, colors1
 
-		if not self.checkPairs(groupedComponents1, groupedComponents2):
-			return False
+	def partition(self, component: Graph):
+		self.prepare(component)
+		while self.queue:  # while queue has elements
+			self.step()
 
-		for key in groupedComponents1.keys():
-			comps1 = groupedComponents1[key]
-			comps2 = groupedComponents2[key]
-			if not self.checkGroupedComponents(comps1, comps2):
-				return False
-		return True
+	def prepare(self, component):
+		# returns a list of color classes TODO
+		partitions = self.prepareColorClasses(component)
+		# partitions = dictionary of <int, ColorClass> (degree, colorclass)
+		classes = list(partitions.values())
+		self.colorclassesSorted = mergeSortBy(classes, lambda x, y: len(x) - len(y))
+		self.currentMaximum = maximum(map(lambda x: x.color, classes))
+		self.queue = self.colorclassesSorted.copy()# init(self.colorclassesSorted)  # queue is every color class except for the biggest
 
-	def checkPairs(self, groupedComponents1, groupedComponents2) -> bool:
-		for key in groupedComponents1.keys():
-			value = groupedComponents1[key]
-			l = len(value)
-			if len(groupedComponents2.get(key, [])) is not l:
-				return False
-		return True
+	def step(self):
+		# perform partitioning
+		currentcolorclass = self.queue.pop(0)
+		largestColor = self.colorclassesSorted[-1].color
 
-	def checkGroupedComponents(self, comps1 : list, comps2 : list)-> bool:
-		partitioner = Partitioner()
-		colors1 = {}
-		for comp in comps1:
-			colors1[comp] = partitioner.partition(comp)
-		colors2 = {}
-		for comp in comps2:
-			colors2[comp] = partitioner.partition(comp)
+		def findNewVertexColor(v: Vertex) -> int:
+			connected = False
+			pass
 
-		for comp in colors1.keys():
-			partition = colors1[comp]
-			self.removeIsometricComponent(comp, colors2)
-		return len(comps2) is 0
+		otherClasses = currentcolorclass.predecessors()
+		colorAssignment = {}
+		for colorClass in otherClasses:
+			classAssignments = {}
+			for v in colorClass.V():
+				if anyMatch(lambda v1: v.adj(v1), currentcolorclass.V()):
+					# connected
+					newColor = self.getSpecificDegree(v, currentcolorclass)
+					classAssignments[newColor] = classAssignments.get(newColor, [])
+					classAssignments[newColor].append(v)
+			colorAssignment[colorClass] = classAssignments
+		resolvedColors = {}
+		for colorClass in colorAssignment.keys():
+			assignedColors = {}
+			colors = colorAssignment[colorClass]
+			for color in colors.keys():
+				convertedColor = 0
+				if color in assignedColors.keys():
+					convertedColor = assignedColors[color]
+				else:
+					self.currentMaximum = maximum(map(lambda x: x.colornum, currentcolorclass._V[-1]._graph.V())) + 1
+					convertedColor = self.currentMaximum
+					assignedColors[color] = convertedColor
+				for v in colors[color]:
+					resolvedColors[v] = convertedColor
+		for colorClass in otherClasses:
+			colorClass.split(lambda v: resolvedColors.get(v, v.colornum), lambda cc: self.queue.append(cc))
+			self.queue.append(colorClass)
 
-	def removeIsometricComponent(self, targetPartition : list, colors2 : dict):
-		for comp in colors2.keys():
-			partition = colors2[comp]
-			if (self.isIsometricPartition(targetPartition, partition)):
-				colors2.pop(comp)
-				return
+		# TODO
 
-	def isIsometricPartition(self, targetPartition : list, partition : list)->bool:
+	def addToQueue(self, obj):
+		if obj not in self.queue:
+			self.queue.append(obj)
 
-		groupedColors1 = {}
-		for colorClass in targetPartition:
-			l = len(colorClass.V())
-			groupedColors1[l] = groupedColors1.get(l, 0) + 1
-		groupedColors2 = {}
-		for colorClass in partition:
-			l = len(colorClass.V())
-			groupedColors2[l] = groupedColors2.get(l, 0) + 1
+	def getColors(self, g: Graph) -> dict:
+		result = {}
+		for v in g.V():
+			if hasattr(v, "colornum"):
+				result[v] = v.colornum
+			else:
+				result[v] = -1
+		return result
 
-		for classSize in groupedColors1.keys():
-			vertexCount = groupedColors1[classSize]
-			for otherClassSize in groupedColors2.keys():
-				otherVertexCount = groupedColors2[otherClassSize]
-				if (vertexCount is otherVertexCount):
-					groupedColors2.pop(otherClassSize)
-					break
-
-		return len(groupedColors2) is 0
-
-
-class Splitter:
-
-	def split(self, graph : Graph) -> list:
-		components = []
-		verticesToGo = graph.V()
-
+	def prepareColorClasses(self, graph: Graph) -> (dict):
+		classes = dict()
 		for v in graph.V():
-			v._found = False
-		for e in graph.E():
-			e._found = False
+			color = -1
+			if hasattr(v, 'colornum'):
+				color = v.colornum
+			else:
+				color = v.deg()
+			classes[color] = classes.get(color, ColorClass(color))
+			classes[color].addVertex(v)
 
-		while(not isEmpty(verticesToGo)):
-			component = self.breadthFirstFind(verticesToGo)
-			components.append(component)
-			verticesToGo = filter(lambda v: not v._found, verticesToGo)
+		return classes
 
-		for v in graph.V():
-			del v._found
-		for e in graph.E():
-			del e._found
-
-		return components
-
-	def breadthFirstFind(self, vertices : list) -> Component:
-
-		foundVertices, foundEdges = [], []
-
-		def markFoundAndAppend(v : Vertex):
-			v._found = True
-			foundVertices.append(v)
-
-			newIncidents = filter(lambda e: not e._found, v.inclist())
-
-			for e in newIncidents:
-				e._found = True
-			foundEdges.extend(newIncidents)
-
-		queue = [vertices[0]]
-
-		while (not isEmpty(queue)):
-			vertex = queue.pop(0)
-			newNeighbours = filter(lambda v: not v._found, vertex.nbs())
-			queue.extend(newNeighbours)
-			markFoundAndAppend(vertex)
-
-		return Component(foundVertices, foundEdges)
-
-class Partitioner:
-
-    def partition(self, component : Component) -> dict:
-        #returns a list of color classes TODO
-        partitions, lastcolor = self.getVerticesByDegree(component)
-        #partitions = dictionary of <int, ColorClass> (degree, colorclass)
-
-        colorclasses = partitions.values()
-        colorclassesSorted = mergeSortBy(colorclasses, lambda x, y : len(x) - len(y))
-
-        colorclassesByVertex = dict()
-        for cclass in colorclasses:
-            for v in cclass.V():
-                colorclassesByVertex[v] = cclass
-
-        queue = init(colorclassesSorted) #queue is every color class except for the biggest
-        while queue: #while queue has elements
-            #perform partitioning
-            currentcolorclass = queue.pop(0)
-
-            #TODO
-
-
-        return partitions
-
-    def getVerticesByDegree(self, graph : Graph) -> (dict, int):
-        byDegree = dict()
-        i = 0
-        for v in graph.V():
-
-            degree = v.deg()
-            vertices = byDegree.get(degree, None)
-            if vertices == None:
-                vertices = ColorClass([])
-                vertices.color = i
-                i += 1
-                byDegree[degree] = vertices
-
-            vertices.addVertex(v)
-
-        return byDegree, i
+	def getSpecificDegree(self, v : Vertex, currentcolorclass : "ColorClass") -> int:
+		return len(filter(lambda edge: edge.head() in currentcolorclass.V(), v.inclist()))
 
 
 class ColorClass:
+	def __init__(self, color):
+		self._V = []
+		self.color = color
 
-    def __init__(self, vertices, predecessors=dict()):
-        self._V = vertices
-        self._pre = predecessors
+	def predecessors(self) -> list:
+		# returns a list of ColorClasses
+		return self.computePredecessors()
 
-    def predecessors(self) -> list:
-       return self._pre.keys()
+	def computePredecessors(self):
+		# returns a dictionary from color(int) to colorclass
+		predecessors = []
 
-    def computePredecessors(self):
-        predecessors = dict()
+		def pointingToVertex(vertex):
+			incidents = vertex.inclist()
+			for e in incidents:
+				if e.head() == vertex or not vertex._graph._directed:
+					predecessor = e.tail()
+					if predecessor.colorclass not in predecessors:
+						predecessors.append(predecessor.colorclass)
 
-        def pointingToVertex(vertex):
-            incidents = vertex.inclist()
-            for e in incidents:
-                if e.head() == vertex:
-                    predecessor = e.tail()
-                    if not predecessor in predecessors:
-                        predecessors[predecessor] = True
-
-        for v in self._V:
-            pointingToVertex(v)
-        self._pre = predecessors
-
-    def V(self):
-        return self._V
-
-    def addVertex(self, v : Vertex):
-        self._V.append(v)
-
-    def __len__(self):
-        return len(self._V)
-
-class Component:
-
-	#represents a connected subgraph of a graph. TODO
-	#can have color class information.
-
-	def __init__(self, graph : Graph, vertices=[], edges=[]):
-		self.colorClasses = []
-		self._G = graph
-		self._V = vertices
-		self._E = edges
+		for v in self._V:
+			pointingToVertex(v)
+		return predecessors
 
 	def V(self):
 		return self._V
 
-	def E(self):
-		return self._E
+	def addVertex(self, v: Vertex):
+		self._V.append(v)
+		v.colorclass = self
+		v.colornum = self.color
 
-	def Graph(self):
-		return self._G
+	def __len__(self):
+		return len(self._V)
 
-	def colorClasses(self):
-		return self.colorClasses
+	def split(self, predicate, onNew):
+
+		classes = dict()
+		for v in self.V():
+			newColor = predicate(v)
+			classes[newColor] = classes.get(newColor, ColorClass(newColor))
+			classes[newColor].addVertex(v)
+			self.V().remove(v)
+		for colorClass in classes.values():
+			onNew(colorClass)
+		return classes.values()

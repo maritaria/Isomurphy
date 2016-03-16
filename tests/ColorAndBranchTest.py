@@ -1,11 +1,11 @@
 import unittest
 from graph.graphIO import loadgraphs, writeDOT
-from isomorphism.IndividualizationRefinementChecker import IndividualiztionRefinementChecker
+from isomorphism.IndividualizationRefinementChecker import IndividualizationRefinementChecker
 
 class IsomorphTest(unittest.TestCase):
 
 	def setUp(self):
-		self._checker = IndividualiztionRefinementChecker()
+		self._checker = IndividualizationRefinementChecker()
 
 
 	def test_Quick(self):

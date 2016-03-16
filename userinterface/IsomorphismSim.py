@@ -5,6 +5,7 @@ import math
 from graph.graphIO import loadgraph
 from graph.graphs import Graph, Vertex, Edge
 from isomorphism import ColorRefinementChecker
+from isomorphism.FastPartitionRefinement import FastPartitionRefinementChecker
 from isomorphism.SimulatingColorRefinementChecker import SimulatingColorRefinementChecker
 
 
@@ -175,8 +176,8 @@ class IsomorphismSim:
 	def __init__(self, left: Graph, right: Graph):
 		self._left_graph = left
 		self._right_graph = right
-		self._checker = SimulatingColorRefinementChecker(left, right)
-		self._checker.prepare()
+		self._checker = FastPartitionRefinementChecker()
+		self._checker.prepare(left)
 		self.create_ui()
 
 	def run(self):
@@ -213,5 +214,5 @@ class IsomorphismSim:
 
 graphs = loadgraph("../tests/data/colorref_smallexample_6_15.grl", True)
 
-# sim = IsomorphismSim(graphs[0][0], graphs[0][2])
-# sim.run()
+sim = IsomorphismSim(graphs[0][0], graphs[0][2])
+sim.run()
