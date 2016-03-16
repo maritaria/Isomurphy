@@ -268,8 +268,8 @@ def maxBy(comparator, x, y):
     else:
         return y
 
-def minimumBy(xs : list, comparator):
+def minimumBy(xs, comparator):
     return foldLeft(lambda x, y : minBy(comparator, x, y), head(xs), tail(xs))
 
-def maximumBy(xs : list, comparator):
+def maximumBy(xs, comparator):
     return foldLeft(lambda x, y : maxBy(comparator, x, y), head(xs), tail(xs))

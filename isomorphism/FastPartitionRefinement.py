@@ -65,24 +65,80 @@ class Splitter:
 
 class Partitioner:
 
-    def __init__(self):
-        #TODO
-        pass
-
-    def partition(self, graph : Graph) -> list:
+    def partition(self, component : Component) -> dict:
         #returns a list of color classes TODO
-        pass
+        partitions, lastcolor = self.getVerticesByDegree(component)
+        #partitions = dictionary of <int, ColorClass> (degree, colorclass)
+
+        colorclasses = partitions.values()
+        colorclassesSorted = mergeSortBy(colorclasses, lambda x, y : len(x) - len(y))
+
+        colorclassesByVertex = dict()
+        for cclass in colorclasses:
+            for v in cclass.V():
+                colorclassesByVertex[v] = cclass
+
+        queue = init(colorclassesSorted) #queue is every color class except for the biggest
+        while queue: #while queue has elements
+            #perform partitioning
+            currentcolorclass = queue.pop(0)
+
+            #TODO
+
+
+        return partitions
+
+    def getVerticesByDegree(self, graph : Graph) -> (dict, int):
+        byDegree = dict()
+        i = 0
+        for v in graph.V():
+
+            degree = v.deg()
+            vertices = byDegree.get(degree, None)
+            if vertices == None:
+                vertices = ColorClass([])
+                vertices.color = i
+                i += 1
+                byDegree[degree] = vertices
+
+            vertices.addVertex(v)
+
+        return byDegree, i
+
 
 class ColorClass:
 
-    def __init__(self):
+    def __init__(self, vertices, predecessors=dict()):
+        self._V = vertices
+        self._pre = predecessors
 
-        pass
+    def predecessors(self) -> list:
+       return self._pre.keys()
 
-    def predecendents(self) -> ColorClass:
-        #TODO
+    def computePredecessors(self):
+        predecessors = dict()
 
-        pass
+        def pointingToVertex(vertex):
+            incidents = vertex.inclist()
+            for e in incidents:
+                if e.head() == vertex:
+                    predecessor = e.tail()
+                    if not predecessor in predecessors:
+                        predecessors[predecessor] = True
+
+        for v in self._V:
+            pointingToVertex(v)
+        self._pre = predecessors
+
+    def V(self):
+        return self._V
+
+    def addVertex(self, v : Vertex):
+        self._V.append(v)
+
+    def __len__(self):
+        return len(self._V)
+
 
 class Component:
 
