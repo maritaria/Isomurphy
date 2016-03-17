@@ -21,7 +21,7 @@ class IndividualizationRefinementChecker(IsomorphismChecker):
             elif colorList[i] > 1:
                 break
         isIso = self.findIsomorphism(graph1, graph2, colorList)
-        return isIso,
+        return isIso
 
 
     def findIsomorphism(self, graph1: Graph, graph2: Graph, colorList):

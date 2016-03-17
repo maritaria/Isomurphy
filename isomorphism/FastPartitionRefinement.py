@@ -10,12 +10,30 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 	def isIsomorphic(self, graph1: Graph, graph2: Graph) -> (bool, list):
 
 		self.partition(graph1)
+		colors1 = self.colorClasses
 		self.partition(graph2)
+		colors2 = self.colorClasses
 
-		colors1, colors2 = countColors(len(graph1.V()) * len(graph1.V()), graph1, graph2)
+		if not self.isBijection(colors1, colors2):
+			return False
 
+		colorList = []
+		for color in colors1.keys():
+			colorClass = colors1[color]
+			for v in colorClass.V():
+				v.colornum = len(colorList)
+			colorList.append(len(colorClass.V()))
 
-		return colors1 == colors2, colors1
+		return True, colorList
+
+	def isBijection(self, colors1, colors2) -> bool:
+		colors2 = list(colors2.values())
+		for colorClass in colors1.values():
+			for otherClass in colors2:
+				if len(colorClass.V()) is len(otherClass.V()):
+					colors2.remove(otherClass)
+					break
+		return len(colors2) is 0
 
 	def partition(self, component: Graph):
 		self.prepare(component)
@@ -112,6 +130,7 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 			currentcolorclass = self.queue.pop(0)
 			if currentcolorclass.V():
 				return currentcolorclass
+
 
 
 class ColorClass:

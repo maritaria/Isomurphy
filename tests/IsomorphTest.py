@@ -1,3 +1,4 @@
+import copy
 import unittest
 from graph.graphIO import loadgraphs, writeDOT
 from isomorphism.ColorRefinementChecker import ColorRefinementChecker
@@ -145,7 +146,7 @@ class IsomorphTest(unittest.TestCase):
 		self.runTest(4, 5, False)
 	"""
 	def runTest(self, index1 : int, index2 : int, expectedResult : bool):
-		g1 = self._graphs[0][index1].clone()
-		g2 = self._graphs[0][index2].clone()
+		g1 = copy.deepcopy(self._graphs[0][index1])
+		g2 = copy.deepcopy(self._graphs[0][index2])
 		result = self._checker.isIsomorphic(g1, g2)
 		self.assertEqual(expectedResult, result)
