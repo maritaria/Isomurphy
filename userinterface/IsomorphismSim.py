@@ -59,6 +59,7 @@ class GraphCanvas(tk.Canvas):
 		self._colors = self._checker.getColors(self._graph)
 		for v in self._graph.V():
 			self.update_color(v)
+		self.update_queue_text()
 
 	def update_color(self, v):
 		oldColor = self._oldColors.get(v, -1)
@@ -77,7 +78,7 @@ class GraphCanvas(tk.Canvas):
 
 	def update_color_new(self, v):
 		shape = self._vertices[v]
-		self.itemconfig(shape, fill="#FDD")
+		self.itemconfig(shape, fill="#F88")
 
 	def addVertex(self, v: Vertex):
 		print("Vertex %s" % v)
@@ -91,6 +92,7 @@ class GraphCanvas(tk.Canvas):
 		self._anglePerVertex = (2 * math.pi) / verticesCount
 		self._radius = verticesCount * GraphCanvas.VERTEX_DISTANCE / (2 * math.pi)
 		self._radius = max(self._radius, 3 * GraphCanvas.VERTEX_DISTANCE / (2 * math.pi))
+		self._queueText = self.create_text(0, 0, font=("Arial", 24), fill="#F00")
 
 	def layout_vertices(self):
 		currentAngle = 0
@@ -127,6 +129,8 @@ class GraphCanvas(tk.Canvas):
 		for edge, shape in self._edges.items():
 			self.lower(shape)
 
+	def update_queue_text(self):
+		self.itemconfig(self._queueText, text=str(self._queue))
 
 
 class GraphCanvasContainer(tk.Frame):
@@ -208,11 +212,12 @@ class IsomorphismSim:
 
 	def perform_step(self):
 		self._checker.step()
+		self._left_container._canvas._queue = self._checker.queue
 		self._left_container._canvas.update_graph()
-		self._right_container._canvas.update_graph()
+		#self._right_container._canvas.update_graph()
 
+if (__name__ is "__main__"):
+	graphs = loadgraph("../tests/data/colorref_smallexample_6_15.grl", True)
 
-graphs = loadgraph("../tests/data/colorref_smallexample_6_15.grl", True)
-
-sim = IsomorphismSim(graphs[0][0], graphs[0][2])
-sim.run()
+	sim = IsomorphismSim(graphs[0][0], graphs[0][2])
+	sim.run()

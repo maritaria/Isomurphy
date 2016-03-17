@@ -4,6 +4,7 @@ from isomorphism.IsomorphismChecker import IsomorphismChecker
 from utils.lists import *
 
 
+
 class FastPartitionRefinementChecker(IsomorphismChecker):
 	# Override
 	def isIsomorphic(self, graph1: Graph, graph2: Graph) -> (bool, list):
@@ -12,6 +13,7 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 		self.partition(graph2)
 
 		colors1, colors2 = countColors(len(graph1.V()) * len(graph1.V()), graph1, graph2)
+
 
 		return colors1 == colors2, colors1
 
@@ -31,13 +33,10 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 
 	def step(self):
 		# perform partitioning
-		currentcolorclass = self.queue.pop(0)
-		largestColor = self.colorclassesSorted[-1].color
-
-		def findNewVertexColor(v: Vertex) -> int:
-			connected = False
-			pass
-
+		currentcolorclass = self.getQueuedColorClass()
+		if not currentcolorclass:
+			return
+		#Pick new raw colors for the vertices
 		otherClasses = currentcolorclass.predecessors()
 		colorAssignment = {}
 		for colorClass in otherClasses:
@@ -49,7 +48,9 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 					classAssignments[newColor] = classAssignments.get(newColor, [])
 					classAssignments[newColor].append(v)
 			colorAssignment[colorClass] = classAssignments
+		#Turn the raw colors into colors compatible with the graph
 		resolvedColors = {}
+		self.currentMaximum = maximum(map(lambda x: x.colornum, currentcolorclass._V[-1]._graph.V()))
 		for colorClass in colorAssignment.keys():
 			assignedColors = {}
 			colors = colorAssignment[colorClass]
@@ -58,16 +59,20 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 				if color in assignedColors.keys():
 					convertedColor = assignedColors[color]
 				else:
-					self.currentMaximum = maximum(map(lambda x: x.colornum, currentcolorclass._V[-1]._graph.V())) + 1
+					self.currentMaximum += 1
 					convertedColor = self.currentMaximum
 					assignedColors[color] = convertedColor
+
 				for v in colors[color]:
 					resolvedColors[v] = convertedColor
+		#Split color classes based on the assigned new colors
 		for colorClass in otherClasses:
-			colorClass.split(lambda v: resolvedColors.get(v, v.colornum), lambda cc: self.queue.append(cc))
-			self.queue.append(colorClass)
-
-		# TODO
+			newClasses = [colorClass]
+			colorClass.split(lambda v: resolvedColors.get(v, v.colornum), lambda cc: newClasses.append(cc))
+			newClasses = mergeSortBy(newClasses, lambda x, y: len(x) - len(y))
+			#newClasses = init(newClasses)
+			for c in newClasses:
+				self.addToQueue(c)
 
 	def addToQueue(self, obj):
 		if obj not in self.queue:
@@ -83,45 +88,56 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 		return result
 
 	def prepareColorClasses(self, graph: Graph) -> (dict):
-		classes = dict()
+		self.colorClasses = {}
 		for v in graph.V():
 			color = -1
 			if hasattr(v, 'colornum'):
 				color = v.colornum
 			else:
 				color = v.deg()
-			classes[color] = classes.get(color, ColorClass(color))
-			classes[color].addVertex(v)
+			self.getColorClass(color).addVertex(v)
 
-		return classes
+		return self.colorClasses.copy()
 
 	def getSpecificDegree(self, v : Vertex, currentcolorclass : "ColorClass") -> int:
 		return len(filter(lambda edge: edge.head() in currentcolorclass.V(), v.inclist()))
 
+	def getColorClass(self, color) -> "ColorClass":
+		colorClass = self.colorClasses.get(color, ColorClass(self, color))
+		self.colorClasses[color] = colorClass
+		return colorClass
+
+	def getQueuedColorClass(self):
+		while(self.queue):
+			currentcolorclass = self.queue.pop(0)
+			if currentcolorclass.V():
+				return currentcolorclass
+
 
 class ColorClass:
-	def __init__(self, color):
+	def __init__(self, colorProvider, color):
 		self._V = []
 		self.color = color
+		self.colorProvider = colorProvider
+
+	def __str__(self):
+		return str(self.color)
+
+	def __repr__(self):
+		return str(self)
 
 	def predecessors(self) -> list:
-		# returns a list of ColorClasses
-		return self.computePredecessors()
-
-	def computePredecessors(self):
 		# returns a dictionary from color(int) to colorclass
 		predecessors = []
 
-		def pointingToVertex(vertex):
-			incidents = vertex.inclist()
+		for v in self._V:
+			incidents = v.inclist()
 			for e in incidents:
-				if e.head() == vertex or not vertex._graph._directed:
+				if e.head() == v or not v._graph._directed:
 					predecessor = e.tail()
-					if predecessor.colorclass not in predecessors:
+					if predecessor.colorclass not in predecessors and (len(predecessor.colorclass.V()) > 1):
 						predecessors.append(predecessor.colorclass)
 
-		for v in self._V:
-			pointingToVertex(v)
 		return predecessors
 
 	def V(self):
@@ -129,6 +145,8 @@ class ColorClass:
 
 	def addVertex(self, v: Vertex):
 		self._V.append(v)
+		if hasattr(v, "colorclass"):
+			v.colorclass.V().remove(v)
 		v.colorclass = self
 		v.colornum = self.color
 
@@ -140,9 +158,12 @@ class ColorClass:
 		classes = dict()
 		for v in self.V():
 			newColor = predicate(v)
-			classes[newColor] = classes.get(newColor, ColorClass(newColor))
-			classes[newColor].addVertex(v)
-			self.V().remove(v)
+			if v.colornum is not newColor:
+				classes[newColor] = classes.get(newColor, self.getColorClass(newColor))
+				classes[newColor].addVertex(v)
 		for colorClass in classes.values():
 			onNew(colorClass)
 		return classes.values()
+
+	def getColorClass(self, color):
+		return self.colorProvider.getColorClass(color)
