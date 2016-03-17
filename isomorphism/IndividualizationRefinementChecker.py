@@ -10,7 +10,7 @@ from userinterface import IsomorphismSim
 
 class IndividualizationRefinementChecker(IsomorphismChecker):
 
-    def isIsomorphic(self, graph1: Graph, graph2: Graph) -> bool:
+    def isIsomorphic(self, graph1: Graph, graph2: Graph) -> (bool, list):
         checker = FastPartitionRefinementChecker()
         result, colorList = checker.isIsomorphic(graph1, graph2)
         if not result:
@@ -20,7 +20,8 @@ class IndividualizationRefinementChecker(IsomorphismChecker):
                 return True
             elif colorList[i] > 1:
                 break
-        return self.findIsomorphism(graph1, graph2, colorList)
+        isIso = self.findIsomorphism(graph1, graph2, colorList)
+        return isIso,
 
 
     def findIsomorphism(self, graph1: Graph, graph2: Graph, colorList):
