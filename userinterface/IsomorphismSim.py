@@ -180,8 +180,10 @@ class IsomorphismSim:
 	def __init__(self, left: Graph, right: Graph):
 		self._left_graph = left
 		self._right_graph = right
-		self._checker = FastPartitionRefinementChecker()
-		self._checker.prepare(left)
+		self._checker1 = FastPartitionRefinementChecker()
+		self._checker1.prepare(left)
+		self._checker2 = FastPartitionRefinementChecker()
+		self._checker2.prepare(right)
 		self.create_ui()
 
 	def run(self):
@@ -201,23 +203,29 @@ class IsomorphismSim:
 	def create_ui_canvas(self):
 		self._containers = tk.PanedWindow(self._window, sashwidth=8, bg="#DDD")
 		self._containers.grid(row=0, sticky=tk.NSEW)
-		self._left_container = GraphCanvasContainer(self._containers, self._left_graph, self._checker)
+		self._left_container = GraphCanvasContainer(self._containers, self._left_graph, self._checker1)
 		self._containers.add(self._left_container, stretch="always")
-		self._right_container = GraphCanvasContainer(self._containers, self._right_graph, self._checker)
+		self._right_container = GraphCanvasContainer(self._containers, self._right_graph, self._checker2)
 		self._containers.add(self._right_container, stretch="always")
+		self._left_container._canvas._queue = self._checker1.queue
+		self._left_container._canvas.update_graph()
+		self._right_container._canvas._queue = self._checker2.queue
+		self._right_container._canvas.update_graph()
 
 	def create_ui_toolbar(self):
 		self._stepbutton = tk.Button(self._window, text="Perform step", command=lambda: self.perform_step())
 		self._stepbutton.grid(row=1, sticky=tk.SW)
 
 	def perform_step(self):
-		self._checker.step()
-		self._left_container._canvas._queue = self._checker.queue
+		self._checker1.step()
+		self._left_container._canvas._queue = self._checker1.queue
 		self._left_container._canvas.update_graph()
-		#self._right_container._canvas.update_graph()
+		self._checker2.step()
+		self._right_container._canvas._queue = self._checker2.queue
+		self._right_container._canvas.update_graph()
 
-if (__name__ is "__main__"):
-	graphs = loadgraph("../tests/data/colorref_smallexample_6_15.grl", True)
 
-	sim = IsomorphismSim(graphs[0][0], graphs[0][2])
-	sim.run()
+graphs = loadgraph("../tests/data/colorref_smallexample_4_16.grl", True)
+
+sim = IsomorphismSim(graphs[0][0], graphs[0][1])
+sim.run()

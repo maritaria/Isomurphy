@@ -5,7 +5,6 @@ from isomorphism.FastPartitionRefinement import FastPartitionRefinementChecker
 from isomorphism.IsomorphismChecker import IsomorphismChecker
 from isomorphism.ColorRefinementChecker import ColorRefinementChecker
 from isomorphism.ColorRefinementChecker import getVerticesByColor
-from userinterface import IsomorphismSim
 
 
 class IndividualizationRefinementChecker(IsomorphismChecker):

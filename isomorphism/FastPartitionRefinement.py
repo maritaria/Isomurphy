@@ -15,7 +15,7 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 		colors2 = self.colorClasses
 
 		if not self.isBijection(colors1, colors2):
-			return False
+			return False,
 
 		colorList = []
 		for color in colors1.keys():
@@ -51,24 +51,24 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 
 	def step(self):
 		# perform partitioning
-		currentcolorclass = self.getQueuedColorClass()
-		if not currentcolorclass:
+		currentClass = self.getQueuedColorClass()
+		if not currentClass:
 			return
 		#Pick new raw colors for the vertices
-		otherClasses = currentcolorclass.predecessors()
+		otherClasses = currentClass.predecessors()
 		colorAssignment = {}
 		for colorClass in otherClasses:
 			classAssignments = {}
 			for v in colorClass.V():
-				if anyMatch(lambda v1: v.adj(v1), currentcolorclass.V()):
+				if anyMatch(lambda v1: v.adj(v1), currentClass.V()):
 					# connected
-					newColor = self.getSpecificDegree(v, currentcolorclass)
+					newColor = self.getSpecificDegree(v, currentClass)
 					classAssignments[newColor] = classAssignments.get(newColor, [])
 					classAssignments[newColor].append(v)
 			colorAssignment[colorClass] = classAssignments
 		#Turn the raw colors into colors compatible with the graph
 		resolvedColors = {}
-		self.currentMaximum = maximum(map(lambda x: x.colornum, currentcolorclass._V[-1]._graph.V()))
+		self.currentMaximum = maximum(map(lambda x: x.colornum, currentClass._V[-1]._graph.V()))
 		for colorClass in colorAssignment.keys():
 			assignedColors = {}
 			colors = colorAssignment[colorClass]

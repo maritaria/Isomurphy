@@ -146,7 +146,7 @@ class IsomorphTest(unittest.TestCase):
 		self.runTest(4, 5, False)
 	"""
 	def runTest(self, index1 : int, index2 : int, expectedResult : bool):
-		g1 = copy.deepcopy(self._graphs[0][index1])
-		g2 = copy.deepcopy(self._graphs[0][index2])
+		g1 = (self._graphs[0][index1])
+		g2 = (self._graphs[0][index2])
 		result = self._checker.isIsomorphic(g1, g2)
 		self.assertEqual(expectedResult, result)
