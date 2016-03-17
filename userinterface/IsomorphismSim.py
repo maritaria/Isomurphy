@@ -65,7 +65,7 @@ class GraphCanvas(tk.Canvas):
 		oldColor = self._oldColors.get(v, -1)
 		newColor = self._colors.get(v, -1)
 		label = self._labels[v]
-		self.itemconfig(label, text= newColor)
+		self.itemconfig(label, text= "%s (%s)"%(newColor, v.colorclass.depth))
 		if oldColor!=newColor:
 			self.update_color_new(v)
 		else:
@@ -225,7 +225,7 @@ class IsomorphismSim:
 		self._right_container._canvas.update_graph()
 
 
-graphs = loadgraph("../tests/data/colorref_smallexample_4_16.grl", True)
+graphs = loadgraph("../tests/data/colorref_smallexample_4_7.grl", True)
 
-sim = IsomorphismSim(graphs[0][0], graphs[0][1])
+sim = IsomorphismSim(graphs[0][1], graphs[0][3])
 sim.run()

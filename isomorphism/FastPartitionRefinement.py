@@ -10,12 +10,12 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 	def isIsomorphic(self, graph1: Graph, graph2: Graph) -> (bool, list):
 
 		self.partition(graph1)
-		colors1 = self.colorClasses
+		colors1 = self.colorClasses.copy()
 		self.partition(graph2)
-		colors2 = self.colorClasses
+		colors2 = self.colorClasses.copy()
 
 		if not self.isBijection(colors1, colors2):
-			return False,
+			return False, None
 
 		colorList = []
 		for color in colors1.keys():
@@ -30,7 +30,8 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 		colors2 = list(colors2.values())
 		for colorClass in colors1.values():
 			for otherClass in colors2:
-				if len(colorClass.V()) is len(otherClass.V()):
+				if len(colorClass.V()) is len(otherClass.V()) and\
+					colorClass.depth is otherClass.depth:
 					colors2.remove(otherClass)
 					break
 		return len(colors2) is 0
@@ -57,7 +58,7 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 		#Pick new raw colors for the vertices
 		otherClasses = currentClass.predecessors()
 		colorAssignment = {}
-		for colorClass in otherClasses:
+		for colorClass in otherClasses:#TODO: Sorted by color class value
 			classAssignments = {}
 			for v in colorClass.V():
 				if anyMatch(lambda v1: v.adj(v1), currentClass.V()):
@@ -69,15 +70,16 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 		#Turn the raw colors into colors compatible with the graph
 		resolvedColors = {}
 		self.currentMaximum = maximum(map(lambda x: x.colornum, currentClass._V[-1]._graph.V()))
-		for colorClass in colorAssignment.keys():
+		for colorClass in colorAssignment.keys():#TODO: Same order, as other graph, order by colorclass color value
 			assignedColors = {}
 			colors = colorAssignment[colorClass]
-			for color in colors.keys():
+			for color in colors.keys():#TODO: Same order, do color values from low to high
 				convertedColor = 0
 				if color in assignedColors.keys():
 					convertedColor = assignedColors[color]
 				else:
-					self.currentMaximum += 1
+					self.currentMaximum += 1#TODO: Make sure the other graph also has the same number of verts that have the degree with the other class
+					#You know this since color is the degree between the class used to split groups and the group itself
 					convertedColor = self.currentMaximum
 					assignedColors[color] = convertedColor
 
@@ -88,6 +90,7 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 			newClasses = [colorClass]
 			colorClass.split(lambda v: resolvedColors.get(v, v.colornum), lambda cc: newClasses.append(cc))
 			newClasses = mergeSortBy(newClasses, lambda x, y: len(x) - len(y))
+			colorClass.depth += 1
 			#newClasses = init(newClasses)
 			for c in newClasses:
 				self.addToQueue(c)
@@ -113,15 +116,15 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 				color = v.colornum
 			else:
 				color = v.deg()
-			self.getColorClass(color).addVertex(v)
+			self.getColorClass(color, 0).addVertex(v)
 
 		return self.colorClasses.copy()
 
 	def getSpecificDegree(self, v : Vertex, currentcolorclass : "ColorClass") -> int:
 		return len(filter(lambda edge: edge.head() in currentcolorclass.V(), v.inclist()))
 
-	def getColorClass(self, color) -> "ColorClass":
-		colorClass = self.colorClasses.get(color, ColorClass(self, color))
+	def getColorClass(self, color, depth) -> "ColorClass":
+		colorClass = self.colorClasses.get(color, ColorClass(self, color, depth))
 		self.colorClasses[color] = colorClass
 		return colorClass
 
@@ -134,10 +137,11 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 
 
 class ColorClass:
-	def __init__(self, colorProvider, color):
+	def __init__(self, colorProvider, color, depth):
 		self._V = []
 		self.color = color
 		self.colorProvider = colorProvider
+		self.depth = depth
 
 	def __str__(self):
 		return str(self.color)
@@ -185,4 +189,4 @@ class ColorClass:
 		return classes.values()
 
 	def getColorClass(self, color):
-		return self.colorProvider.getColorClass(color)
+		return self.colorProvider.getColorClass(color, self.depth + 1)
