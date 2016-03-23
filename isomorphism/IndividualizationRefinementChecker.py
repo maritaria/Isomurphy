@@ -57,7 +57,7 @@ class IndividualizationRefinementChecker(IsomorphismChecker):
                 if colorList[i] > 1 and i < color:
                     color = i
             verteces1 = getVerticesByColor(graph1, color)
-            verteces2 = getVerticesByColor(copy.copy(graph2), color)
+            verteces2 = getVerticesByColor(copy.deepcopy(graph2), color)
             vertix1 = verteces1.pop(0)
             num = 0
             for i in range(len(verteces2)):

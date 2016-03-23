@@ -224,7 +224,7 @@ class IsomorphismSim:
 		self._right_container._canvas.update_graph()
 
 
-graphs = loadgraph("../tests/data/cubes3.grl", True)
+graphs = loadgraph("../tests/data/cubes4.grl", True)
 
-sim = IsomorphismSim(graphs[0][0], graphs[0][1])
+sim = IsomorphismSim(graphs[0][2], graphs[0][2])
 sim.run()
