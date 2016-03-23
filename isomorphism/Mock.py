@@ -18,7 +18,7 @@ class ColorClass:
 		return len(self._V1)
 
 	def addVerts(self, vs1, vs2):
-		if len(vs1) is not len(vs2):
+		if len(vs1) != len(vs2):
 			raise InvalidSplitException()
 		for v in vs1:
 			self.addV1(v)
@@ -92,16 +92,7 @@ class Partitioner:
 				color = v.deg()
 			self.getColorClass(color).addV2(v)
 		#Put all classes on the queue, except the largest one
-		largest = list(self._colors.values())[0]
-
-		for colorClass in self._colors.values():
-			if colorClass is not largest:
-				if colorClass.count() > largest.count():
-					self._queue.append(largest)
-					largest = colorClass
-				else:
-					self._queue.append(colorClass)
-
+		self._queue = list(self._colors.values())
 		#TODO: Verify integrity of all colorClasses
 
 	def split(self, colorClass):
@@ -110,7 +101,7 @@ class Partitioner:
 				self.splitClass(colorClass, otherClass)
 
 	def splitClass(self, colorClass, otherClass):
-		if colorClass.count() * otherClass.count() is 0:
+		if colorClass.count() * otherClass.count() == 0:
 			return
 
 		newClasses = []
@@ -166,7 +157,7 @@ class Partitioner:
 
 	def getColorClass(self, color):
 		colorClass = self._colors.get(color)
-		if colorClass is None:
+		if colorClass == None:
 			colorClass = ColorClass(self._G1, self._G2, color)
 			self._colors[color] = colorClass
 		self._topColor = max(self._topColor, color)
