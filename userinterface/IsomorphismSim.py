@@ -6,6 +6,7 @@ from graph.graphIO import loadgraph
 from graph.graphs import Graph, Vertex, Edge
 from isomorphism import ColorRefinementChecker
 from isomorphism.FastPartitionRefinement import FastPartitionRefinementChecker
+from isomorphism.Mock import Partitioner
 from isomorphism.SimulatingColorRefinementChecker import SimulatingColorRefinementChecker
 
 
@@ -25,13 +26,14 @@ def _create_circle_arc(self, x, y, r, **kwargs):
 
 tk.Canvas.create_circle_arc = _create_circle_arc
 
+FONT_SIZE = 12
 
 class GraphCanvas(tk.Canvas):
 	VERTEX_SIZE = 50
 	VERTEX_HALFSIZE = 25
 	VERTEX_DISTANCE = 75
 
-	def __init__(self, master, g: Graph, checker : SimulatingColorRefinementChecker, cnf=None, **kwargs):
+	def __init__(self, master, g: Graph, checker : Partitioner, cnf=None, **kwargs):
 		tk.Canvas.__init__(self, master, cnf, **kwargs)
 		self._graph = g
 		self._checker = checker
@@ -65,7 +67,7 @@ class GraphCanvas(tk.Canvas):
 		oldColor = self._oldColors.get(v, -1)
 		newColor = self._colors.get(v, -1)
 		label = self._labels[v]
-		self.itemconfig(label, text= "%s (%s)"%(newColor, v.colorclass.depth))
+		self.itemconfig(label, text= "%s"%(newColor))
 		if oldColor!=newColor:
 			self.update_color_new(v)
 		else:
@@ -83,7 +85,7 @@ class GraphCanvas(tk.Canvas):
 	def addVertex(self, v: Vertex):
 		print("Vertex %s" % v)
 		shape = self.create_oval(0, 0, 50, 50, fill="#FFF", outline="black")
-		label = self.create_text(0,0, text= self._colors[v], font=("Arial", 24))
+		label = self.create_text(0,0, text= self._colors[v], font=("Arial", FONT_SIZE))
 		self._vertices[v] = shape
 		self._labels[v] = label
 
@@ -134,7 +136,7 @@ class GraphCanvas(tk.Canvas):
 
 
 class GraphCanvasContainer(tk.Frame):
-	def __init__(self, master, g: Graph, checker : SimulatingColorRefinementChecker, cnf=None, **kwargs):
+	def __init__(self, master, g: Graph, checker : Partitioner, cnf=None, **kwargs):
 		tk.Frame.__init__(self, master, cnf, **kwargs)
 
 		# setup scrollbars
@@ -180,10 +182,8 @@ class IsomorphismSim:
 	def __init__(self, left: Graph, right: Graph):
 		self._left_graph = left
 		self._right_graph = right
-		self._checker1 = FastPartitionRefinementChecker()
-		self._checker1.prepare(left)
-		self._checker2 = FastPartitionRefinementChecker()
-		self._checker2.prepare(right)
+		self._checker = Partitioner(left, right)
+		self._checker.prepare()
 		self.create_ui()
 
 	def run(self):
@@ -203,13 +203,13 @@ class IsomorphismSim:
 	def create_ui_canvas(self):
 		self._containers = tk.PanedWindow(self._window, sashwidth=8, bg="#DDD")
 		self._containers.grid(row=0, sticky=tk.NSEW)
-		self._left_container = GraphCanvasContainer(self._containers, self._left_graph, self._checker1)
+		self._left_container = GraphCanvasContainer(self._containers, self._left_graph, self._checker)
 		self._containers.add(self._left_container, stretch="always")
-		self._right_container = GraphCanvasContainer(self._containers, self._right_graph, self._checker2)
+		self._right_container = GraphCanvasContainer(self._containers, self._right_graph, self._checker)
 		self._containers.add(self._right_container, stretch="always")
-		self._left_container._canvas._queue = self._checker1.queue
+		self._left_container._canvas._queue = self._checker._queue
 		self._left_container._canvas.update_graph()
-		self._right_container._canvas._queue = self._checker2.queue
+		self._right_container._canvas._queue = self._checker._queue
 		self._right_container._canvas.update_graph()
 
 	def create_ui_toolbar(self):
@@ -217,15 +217,14 @@ class IsomorphismSim:
 		self._stepbutton.grid(row=1, sticky=tk.SW)
 
 	def perform_step(self):
-		self._checker1.step()
-		self._left_container._canvas._queue = self._checker1.queue
+		self._checker.step()
+		self._left_container._canvas._queue = self._checker._queue
+		self._right_container._canvas._queue = self._checker._queue
 		self._left_container._canvas.update_graph()
-		self._checker2.step()
-		self._right_container._canvas._queue = self._checker2.queue
 		self._right_container._canvas.update_graph()
 
 
-graphs = loadgraph("../tests/data/colorref_smallexample_4_7.grl", True)
+graphs = loadgraph("../tests/data/colorref_smallexample_2_49.grl", True)
 
-sim = IsomorphismSim(graphs[0][1], graphs[0][3])
+sim = IsomorphismSim(graphs[0][0], graphs[0][1])
 sim.run()
