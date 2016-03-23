@@ -40,7 +40,7 @@ class IndividualizationRefinementChecker(IsomorphismChecker):
         return False
 
     def countIsomorphisms(self, graph1: Graph, graph2: Graph):
-        checker = ColorRefinementChecker()
+        checker = FastPartitionRefinementChecker()
         # sim = IsomorphismSim.IsomorphismSim(copy.deepcopy(graph1), copy.deepcopy(graph2))
         # sim.run()
         result, colorList = checker.isIsomorphic(graph1, graph2)
