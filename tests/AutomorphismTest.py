@@ -32,7 +32,7 @@ class IsomorphCountTest(unittest.TestCase):
         self.runTest(0, 3, 0)
         self.runTest(1, 2, 0)
         self.runTest(1, 3, 0)
-        self.runTest(2, 3, 0)
+        self.runTest(2, 3, 24)
 
     def test_torus(self):
         self._graphs = loadgraphs('data\\torus24.grl')
