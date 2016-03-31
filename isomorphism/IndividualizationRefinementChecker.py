@@ -24,7 +24,7 @@ class IndividualizationRefinementChecker(IsomorphismChecker):
 
 
     def findIsomorphism(self, graph1: Graph, graph2: Graph, colorList):
-        color = len(graph1.V()) + 1
+        color = len(colorList) + 1
         for i in range(len(colorList)):
             if colorList[i] > 1 and i < color:
                 color = i
