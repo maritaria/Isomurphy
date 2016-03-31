@@ -59,9 +59,9 @@ class Partitioner:
 		self._directed = self._G1._directed
 
 	def partition(self):
-		self.prepare()
 		# steps
 		try:
+			self.prepare()
 			while self._queue:
 				self.step()
 		except InvalidSplitException:
@@ -95,17 +95,24 @@ class Partitioner:
 			else:
 				color = v.deg()
 			self.getColorClass(color).addV2(v)
-		#Put all classes on the queue, except the largest one
+
+		for colorClass in self._colors.values():
+			if len(colorClass.V1()) != len(colorClass.V2()):
+				raise InvalidSplitException()
 		self._queue = list(self._colors.values())
+
 		#TODO: Verify integrity of all colorClasses
 
 	def split(self, colorClass):
 		for otherClass in list(self._colors.values()):
-			if otherClass is not colorClass:
-				self.splitClass(colorClass, otherClass)
+			self.splitClass(colorClass, otherClass)
 
 	def splitClass(self, colorClass, otherClass):
-		if colorClass.count() * otherClass.count() == 0:
+		if otherClass is colorClass:
+			return
+		if otherClass.count() <= 1:
+			return
+		if colorClass.count() == 0:
 			return
 
 		newClasses = []
@@ -115,6 +122,8 @@ class Partitioner:
 			degree = self.getDegreeWithClass1(v, colorClass)
 			degrees1[degree] = degrees1.get(degree, [])
 			degrees1[degree].append(v)
+		if (len(degrees1) == 1):
+			return
 
 		degrees2 = {}
 		for v in otherClass.V2():
@@ -123,8 +132,6 @@ class Partitioner:
 			degrees2[degree].append(v)
 		# TODO: degrees1 en degrees2 should be bijections
 		#Split otherClass based on degree with colorClass
-		if (len(degrees1) == 1):
-			return
 		for d in degrees1:
 			verts1 = degrees1[d]
 			if not d in degrees2.keys():
