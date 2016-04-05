@@ -14,6 +14,16 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 			return False, []
 
 		colorList = []
+		remainingKeys = list(party._colors.keys())
+		while len(remainingKeys) > 0:
+			color = remainingKeys.pop()
+			colorClass = party._colors[color]
+			while len(colorList) < color + 1:
+				colorList.append(0)
+			colorList[color] = colorClass.count()
+
+
+			"""
 		for color in party._colors.keys():
 			colorClass = party._colors[color]
 			count = colorClass.count()
@@ -23,7 +33,7 @@ class FastPartitionRefinementChecker(IsomorphismChecker):
 				for v in colorClass.V2():
 					v.colornum = len(colorList)
 				colorList.append(count)
-
+			"""
 		return True, colorList
 
 	def isBijection(self, colors1, colors2) -> bool:
