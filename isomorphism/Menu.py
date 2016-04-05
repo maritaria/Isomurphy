@@ -62,10 +62,28 @@ def isomorphism(checker, L):
 
 
 def automorphism(checker, L):
-     for i in range(len(L[0]) - 1):
-        for j in range(i + 1, len(L[0])):
-            if checker.countIsomorphism(copy.deepcopy(L[0][i]), copy.deepcopy(L[0][j])):
-                print(i, " and ", j, "are isomorphic")
-
+    print("Sets of isomorphic graphs:", "Number of automorphisms:")
+    isomorph = []
+    toCheck = []
+    checking = []
+    for i in range(len(L[0])):
+        toCheck.append(i)
+    while len(toCheck) > 0:
+        checking = toCheck
+        toCheck = []
+        isomorph.append(checking[0])
+        for j in range(1, len(checking)):
+            if checker.isIsomorphic(copy.deepcopy(L[0][checking[0]]), copy.deepcopy(L[0][checking[j]])):
+                isomorph.append(checking[j])
+            else:
+                toCheck.append(checking[j])
+        if len(isomorph) <= 1:
+            number = checker.countIsomorphisms(L[0][isomorph[0]], L[0][isomorph[0]])
+            print(isomorph, number)
+            isomorph = []
+        else:
+            number = checker.countIsomorphisms(L[0][isomorph[0]], L[0][isomorph[1]])
+            print(isomorph, number)
+            isomorph = []
 
 run()
