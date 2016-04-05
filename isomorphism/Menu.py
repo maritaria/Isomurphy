@@ -31,6 +31,16 @@ def run():
             chosen_mode = True
         else:
             print("Please pick either 1 or 2")
+    stop = False
+    while not stop:
+        execute_file(command, checker)
+        cont = input("Would you like to read another file? Y/N")
+        if cont == "Y":
+            stop = False
+        elif cont == "N":
+            stop = True
+
+def execute_file(command, checker):
     name = input("What file would you like to use?")
     L = loadgraphs(name)
     if command == "isIsomorphic":
