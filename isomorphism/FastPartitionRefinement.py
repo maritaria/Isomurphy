@@ -9,6 +9,13 @@ from utils.lists import *
 class FastPartitionRefinementChecker(IsomorphismChecker):
 	# Override
 	def isIsomorphic(self, graph1: Graph, graph2: Graph) -> (bool, list):
+		if len(graph1._V) == 0:
+			return False, []
+		if len(graph1._V) != len(graph2._V):
+			return False, []
+		if len(graph1._E) != len(graph2._E):
+			return False, []
+
 		party = Partitioner(graph1, graph2)
 		if not party.partition():
 			return False, []
