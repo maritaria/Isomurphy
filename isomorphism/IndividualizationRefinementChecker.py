@@ -52,7 +52,7 @@ class IndividualizationRefinementChecker(IsomorphismChecker):
         if bijection:
             return 1
         else:
-            color = len(graph1.V()) + 1
+            color = len(colorList)
             for i in range(len(colorList)):
                 if colorList[i] > 1 and i < color:
                     color = i

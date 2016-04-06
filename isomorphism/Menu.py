@@ -1,5 +1,7 @@
 import copy
 
+import sys
+
 from graph.graphIO import loadgraphs
 from isomorphism.ColorRefinementChecker import ColorRefinementChecker
 from isomorphism.FastPartitionRefinement import FastPartitionRefinementChecker
@@ -72,6 +74,7 @@ def isomorphism(checker, L):
 
 
 def automorphism(checker, L):
+    sys.setrecursionlimit(10000)
     print("Sets of isomorphic graphs:", "Number of automorphisms:")
     isomorph = []
     toCheck = []
