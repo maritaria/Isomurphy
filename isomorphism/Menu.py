@@ -45,6 +45,8 @@ def run():
 def execute_file(command, checker):
     name = input("What file would you like to use?")
     L = loadgraphs(name)
+    if len(L[0])== 1:
+        L[0].append(L[0][0])
     if command == "isIsomorphic":
         isomorphism(checker, L)
     elif command == "countIsomorphisms":
@@ -91,11 +93,11 @@ def automorphism(checker, L):
             else:
                 toCheck.append(checking[j])
         if len(isomorph) <= 1:
-            number = checker.countIsomorphisms(L[0][isomorph[0]], L[0][isomorph[0]])
+            number = checker.countIsomorphisms(copy.deepcopy(L[0][isomorph[0]]), copy.deepcopy(L[0][isomorph[0]]))
             print(isomorph, number)
             isomorph = []
         else:
-            number = checker.countIsomorphisms(L[0][isomorph[0]], L[0][isomorph[1]])
+            number = checker.countIsomorphisms(copy.deepcopy(L[0][isomorph[0]]), copy.deepcopy(L[0][isomorph[1]]))
             print(isomorph, number)
             isomorph = []
 

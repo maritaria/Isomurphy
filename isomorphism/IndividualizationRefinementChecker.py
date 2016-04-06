@@ -8,8 +8,8 @@ from isomorphism.ColorRefinementChecker import getVerticesByColor
 
 
 class IndividualizationRefinementChecker(IsomorphismChecker):
-    def __init(self):
-        self._checker = ColorRefinementChecker()
+    def __init__(self):
+        self._checker = FastPartitionRefinementChecker()
 
     def isIsomorphic(self, graph1: Graph, graph2: Graph) -> (bool, list):
         result, colorList = self._checker.isIsomorphic(graph1, graph2)
@@ -32,12 +32,16 @@ class IndividualizationRefinementChecker(IsomorphismChecker):
         verteces1 = getVerticesByColor(graph1, color)
         verteces2 = getVerticesByColor(graph2, color)
         vertix1 = verteces1.pop(0)
+        coloring = vertix1.colornum
+        vertix1.colornum = len(colorList)
         for i in range(len(verteces2)):
             vertix2 = verteces2.pop(0)
-            vertix1.colornum = len(colorList)
             vertix2.colornum = len(colorList)
-            if self.isIsomorphic(graph1, graph2):
+            if self.isIsomorphic(copy.deepcopy(graph1), copy.deepcopy(graph2)):
                 return True
+            vertix2.colornum = coloring
+        vertix1.colornum = coloring
+
         return False
 
     def countIsomorphisms(self, graph1: Graph, graph2: Graph):

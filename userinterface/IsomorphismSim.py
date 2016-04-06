@@ -8,6 +8,7 @@ from isomorphism import ColorRefinementChecker
 from isomorphism.FastPartitionRefinement import FastPartitionRefinementChecker
 from isomorphism.Mock import Partitioner
 from isomorphism.SimulatingColorRefinementChecker import SimulatingColorRefinementChecker
+import copy
 
 
 def _create_circle(self, x, y, r, **kwargs):
@@ -224,7 +225,8 @@ class IsomorphismSim:
 		self._right_container._canvas.update_graph()
 
 
-graphs = loadgraph("../tests/data/cubes4.grl", True)
-
-sim = IsomorphismSim(graphs[0][2], graphs[0][2])
+graphs = loadgraph("../tests/data/basicaut1.gr", True)
+#graphs[0][0].V()[0].colornum = 4
+#graphs[0][1].V()[0].colornum = 4
+sim = IsomorphismSim(copy.deepcopy(graphs[0][0]), copy.deepcopy(graphs[0][0]))
 sim.run()

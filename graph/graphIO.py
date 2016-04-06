@@ -239,7 +239,7 @@ def writeDOT(G: Graph, filename: str, directed: bool = False):
 		nextname += 1
 		options = 'penwidth=3,'
 		if hasattr(v, 'label'):
-			options += 'label="' + str(v.label) + '",'
+			options += 'label="' + str(v.label()) + '",'
 		if hasattr(v, 'colortext'):
 			options += 'color="' + v.colortext + '",'
 		elif hasattr(v, 'colornum'):
@@ -254,7 +254,7 @@ def writeDOT(G: Graph, filename: str, directed: bool = False):
 
 	for e in G.E():
 		options = 'penwidth=2,'
-		if hasattr(e, 'weight'):
+		if hasattr(e, 'label'):
 			options += 'label="' + str(e.weight) + '",'
 		if hasattr(e, 'colortext'):
 			options += 'color="' + e.colortext + '",'
